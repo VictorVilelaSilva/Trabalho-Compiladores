@@ -5,13 +5,17 @@ from typing import List
 #####################################Analisador Léxico (Pascal)################################
 # percorre o arquivo e retorna os tokens
 
-def variableBuilded(variableRegex, variaveis, buildedVariable,palavrasReservadas):
-    if buildedVariable != "" and re.fullmatch(variableRegex, buildedVariable) and (buildedVariable not in palavrasReservadasRegras) :
+def variableBuilded(variableRegex, variaveis, buildedVariable,palavrasReservadas,linha,coluna,lista,line):
+    if buildedVariable != "" and re.fullmatch(variableRegex, buildedVariable) and (buildedVariable not in palavrasReservadas) :
         if buildedVariable not in variaveis:
-            variaveis.append(buildedVariable)
+            coluna = line.find(buildedVariable)
+            variaveis.append(['tkn_variaveis',buildedVariable,linha,coluna+1])
+            lista.append(['tkn_variaveis',buildedVariable,linha,coluna+1])
         return True
     elif buildedVariable != "" and buildedVariable in palavrasReservadasRegras:
-        palavrasReservadas.append(buildedVariable)
+        coluna = line.find(buildedVariable)
+        palavrasReservadas.append(['tkn_palavras_reservadas',buildedVariable,linha,coluna+1])
+        lista.append(['tkn_palavras_reservadas',buildedVariable,linha,coluna+1])
         return True
     return False
 
@@ -23,7 +27,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
     variableRegex = r'[a-zA-Z][a-zA-Z0-9_]*'
     # variableRegex = r'^[a-zA-Z][a-zA-Z0-9]*$'
 
-
+    lista = []
     tokensAritimeticos = []
     tokensLogicosRelacionaisAtri = []
     palavrasReservadas = []
@@ -49,68 +53,91 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
 
         # verifica se a linha é um comentário
         tempLine = line.lstrip()
+
         if(tempLine.startswith('//')):
-            comentariosArray.append(tempLine)
+            coluna = line.find(word)
+            comentariosArray.append(['tkn_comentarios',tempLine,linha,coluna+1])
+            coluna = line.find(word)
+            lista.append(['tkn_comentarios',tempLine,linha,coluna+1])
+            
             linha += 1
             continue
 
         # percorre a linha por palavra
         for word in line.split(' '):
      
-            if not line.startswith(word) and not word.isspace(): 
-                coluna += 1
+            # if not line.startswith(word) and not word.isspace(): 
+                
             
             #faz com que ocorra uma espaco entre as palavras da string
             if(modoString):
                 string += " "
-                coluna += 1
+                
 
             
             # verifica se a palavra é uma palavra reservada
-            if (word in palavrasReservadasRegras) and not modoString and not dentroComentario: 
-                palavrasReservadas.append(word)
+            if (word in palavrasReservadasRegras) and not modoString and not dentroComentario:
+                coluna = line.find(word)
+                palavrasReservadas.append(['tkn_palavras_reservadas',word,linha,coluna+1])
+                lista.append(['tkn_palavras_reservadas',word,linha,coluna+1])
                 coluna =+ (len(word))
                 continue
             
             # verifica se a palavra não é uma palavra reservada e é uma variável
             elif (word not in palavrasReservadasRegras) and (word not in tokensLogicosRelacionaisAtriRegras)and (re.fullmatch(variableRegex, word) and not modoString and not dentroComentario):
                 if(word[-1] == ';'):
-                    variaveis.append(word[:-1])
-                    tokensSimbolos.append(';')
+                    coluna = line.find(word)
+                    variaveis.append(word)
+                    lista.append(['tkn_variaveis',word,linha,coluna+1])
+                    coluna = line.find(word-1)
+                    tokensSimbolos.append(['tkn_simbolo',word-1,linha,coluna+1])
+                    lista.append(['tkn_simbolo',word-1,linha,coluna+1])
                     continue
-                variaveis.append(word)
+                coluna = line.find(word)
+                variaveis.append(['tkn_variaveis',word,linha,coluna+1])
+                coluna = line.find(word)
+                lista.append(['tkn_variaveis',word,linha,coluna+1])
                 coluna =+ (len(word))
                 continue
 
             # verifica se a palavra é um tokensLogicosRelacionaisAtri
             elif (word in tokensLogicosRelacionaisAtriRegras) and not modoString and not dentroComentario:
-                tokensLogicosRelacionaisAtri.append(word)
+                coluna = line.find(word)
+                tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',word,linha,coluna+1])
+                coluna = line.find(word)
+                lista.append(['tkn_logicos_relacionais_atributos',word,linha,coluna+1])
                 coluna =+ (len(word))
                 continue
             
             # percorre a palavra por caractere
             for caractere in word:
-                coluna += 1
+                
 
                 # verifica se esta no modo string
                 if modoString:
                     string+=caractere
                     if caractere == "'":
                         modoString = False
-                        stringsArray.append(string[:-1])
+                        coluna = line.find(word)
+                        stringsArray.append(['tkn_string',string[:-1],linha,coluna+1])
+                        coluna = line.find(word)
+                        lista.append(['tkn_string',string[:-1],linha,coluna+1])
                         string = ""
                     continue  
                
                 # verifica se o caractere é um espaço
                 if (caractere == '\s'):
-                   if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas):
+                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
                         variableBuilder = "" 
                         continue
                 
                 # verifica se o caractere é um tokensAritimeticos
                 if (caractere in tokensAritimeticosRegras) and not modoString and not dentroComentario:
-                    tokensAritimeticos.append(caractere)
-                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas):
+                    coluna = line.find(word)
+                    tokensAritimeticos.append(['tkn_aritimetico',caractere,linha,coluna+1])
+                    coluna = line.find(word)
+                    lista.append(['tkn_aritimetico',caractere,linha,coluna+1])
+                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
                         variableBuilder = "" 
                         continue
                     continue
@@ -121,17 +148,23 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     posicao = line.find(caractere)
                     newCaractere = caractere+line[posicao+1]
                     if  (newCaractere  in tokensLogicosRelacionaisAtriRegras):
-                        tokensLogicosRelacionaisAtri.append(newCaractere)
+                        coluna = line.find(word)
+                        tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',newCaractere, linha, coluna])
+                        coluna = line.find(word)
+                        lista.append(['tkn_logicos_relacionais_atributos',newCaractere, linha, coluna])
                         variableBuilder = ""  # Reinicia para o próximo número
                         continue
 
     
-                    tokensLogicosRelacionaisAtri.append(caractere)
-                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas):
+                    coluna = line.find(word)
+                    tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',caractere,linha,coluna+1])
+                    coluna = line.find(word)
+                    lista.append(['tkn_logicos_relacionais_atributos',caractere,linha,coluna+1])
+                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
                         variableBuilder = "" 
                         continue
                     continue
-
+                    
                 # Se não é um dígito, mas temos um número acumulado, verifique se é um flutuante
                 elif (caractere.isdigit() or caractere == '.') and variableBuilder == "" and not modoString and not dentroComentario:
                     numero += caractere
@@ -147,13 +180,19 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 # Se não é um dígito, mas temos um número acumulado, verifique se é um inteiro
                 elif numero and (variableBuilder == "") and (not caractere.isdigit() or caractere == word[-1]) and not modoString and not dentroComentario and (numerberType == "int"):
                     if re.fullmatch(intRegex, numero):
-                        inteirosArray.append(int(numero))
+                        coluna = line.find(word)
+                        inteirosArray.append(['tkn_inteiro',int(numero),linha,coluna+1])
+                        coluna = line.find(word)
+                        lista.append(['tkn_inteiro',int(numero),linha,coluna+1])
                     numero = "" 
                     
                 # Finaliza a construção do número flutuante quando encontra um caractere não numérico ou fim da palavra
                 elif numero and (not caractere.isdigit() and (caractere != '.' or caractere == word[-1])):
                     if re.fullmatch(floatRegex, numero):
-                        floatsArray.append(float(numero))
+                        coluna = line.find(word)
+                        floatsArray.append(['tkn_float',float(numero),linha,coluna+1])
+                        coluna = line.find(word)
+                        lista.append(['tkn_float',float(numero),linha,coluna+1])
                         numero = ""  
                     continue
             
@@ -164,10 +203,15 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     # condicional para não querbrar caso seja o ultimo caractere da linha
                     if (caractere not in word[-1]):
                         if(line[indice+1] == "="):
-                            tokensLogicosRelacionaisAtri.append(caractere+line[indice+1])
+                            coluna = line.find(word)
+                            tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',caractere+line[indice+1],linha,coluna+1])
+                            coluna = line.find(word)
+                            lista.append(['tkn_logicos_relacionais_atributos',caractere+line[indice+1],linha,coluna+1])
                             continue
-                    tokensSimbolos.append(caractere)
-                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas):
+                    coluna = line.find(caractere)
+                    tokensSimbolos.append(['tkn_simbolo',caractere,linha,coluna+1])
+                    lista.append(['tkn_simbolo',caractere,linha,coluna+1])
+                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
                         variableBuilder = "" 
                         continue
                     continue
@@ -186,16 +230,19 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 elif (caractere == '{') and not modoString and not dentroComentario:
                     dentroComentario = True
                     textoComentario = caractere  # Inicia o texto do comentário com '{'
-                    coluna += 1
+                    
                     continue
             
                 # Se estiver dentro de um comentário, acumula o texto
                 elif dentroComentario:
                     textoComentario += caractere  # Acumula texto do comentário
-                    coluna += 1
+                    
                     if caractere == '}':
                         dentroComentario = False
-                        comentariosArray.append(textoComentario)  # Adiciona o comentário acumulado ao array
+                        coluna = line.find(word)
+                        comentariosArray.append(['tkn_comentario',textoComentario,linha,coluna+1])  # Adiciona o comentário acumulado ao array
+                        coluna = line.find(word)
+                        lista.append(['tkn_comentario',textoComentario,linha,coluna+1])  # Adiciona o comentário acumulado ao array
                         textoComentario = ""  # Reinicia para o próximo comentário
                     continue
 
@@ -203,7 +250,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
 
             variableBuilder = ""
 
-    tokens = {
+    tokensDict = {
         'tokensAritimeticos': tokensAritimeticos,
         'tokensLogicosRelacionaisAtri' : tokensLogicosRelacionaisAtri,
         'palavrasReservadas' : palavrasReservadas,
@@ -214,7 +261,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
         'floats' : floatsArray,
         'comentarios' : comentariosArray
     }
-    return tokens
+    return tokensDict, lista
 
 
 tokensAritimeticosRegras: List[str] = [
@@ -270,21 +317,15 @@ tokensSimbolosRegras: List[str] = [
     ')',
 ]
 
-# tokens = {
-#     'tokensAritimeticosRegras': tokensAritimeticosRegras,
-#     'tokensLogicosRelacionaisAtriRegras': tokensLogicosRelacionaisAtriRegras,
-#     'palavrasReservadasRegr': palavrasReservadasRegr,
-#     'tokensSimbolos': tokensSimbolos
-# }
 
-diretorio = 'listas\lista1\EXS22.pas'
+diretorio = 'listas\lista1\EXS1.pas'
 
 pascalExercise = open( diretorio, 'r')
 pascalExerciseContent = pascalExercise.read()
 
-resultado = getTokens(pascalExerciseContent)
+tokenDict,lista = getTokens(pascalExerciseContent)
 
-resultadoJsom = json.dumps(resultado)
+resultadoJsom = json.dumps(lista)
 criarArquivo = open('resultado.json', 'w')
 criarArquivo.write(resultadoJsom)
 #passar resultado para JSON
