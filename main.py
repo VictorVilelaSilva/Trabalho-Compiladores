@@ -5,13 +5,13 @@ from typing import List
 #####################################Analisador Léxico (Pascal)################################
 # percorre o arquivo e retorna os tokens
 
-def variableBuilded(variableRegex, variaveis, buildedVariable,palavrasReservadas):
+def variableBuilded(variableRegex, variaveis, buildedVariable,palavrasReservadas,linha,coluna):
     if buildedVariable != "" and re.fullmatch(variableRegex, buildedVariable) and (buildedVariable not in palavrasReservadasRegras) :
         if buildedVariable not in variaveis:
-            variaveis.append(buildedVariable)
+            variaveis.append(['tkn_variaveis',buildedVariable,linha,coluna])
         return True
     elif buildedVariable != "" and buildedVariable in palavrasReservadasRegras:
-        palavrasReservadas.append(buildedVariable)
+        palavrasReservadas.append(['tkn_palavras_reservadas',buildedVariable,linha,coluna])
         return True
     return False
 
@@ -49,8 +49,10 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
 
         # verifica se a linha é um comentário
         tempLine = line.lstrip()
+
         if(tempLine.startswith('//')):
-            comentariosArray.append(tempLine)
+            comentariosArray.append(['tkn_comentarios',tempLine,linha,coluna])
+            
             linha += 1
             continue
 
@@ -68,7 +70,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
             
             # verifica se a palavra é uma palavra reservada
             if (word in palavrasReservadasRegras) and not modoString and not dentroComentario: 
-                palavrasReservadas.append(word)
+                palavrasReservadas.append(['tkn_palavras_reservadas',word,linha,coluna])
                 coluna =+ (len(word))
                 continue
             
@@ -76,15 +78,15 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
             elif (word not in palavrasReservadasRegras) and (word not in tokensLogicosRelacionaisAtriRegras)and (re.fullmatch(variableRegex, word) and not modoString and not dentroComentario):
                 if(word[-1] == ';'):
                     variaveis.append(word[:-1])
-                    tokensSimbolos.append(';')
+                    tokensSimbolos.append(['tkn_simbolo',';',linha,coluna])
                     continue
-                variaveis.append(word)
+                variaveis.append(['tkn_variaveis',word,linha,coluna])
                 coluna =+ (len(word))
                 continue
 
             # verifica se a palavra é um tokensLogicosRelacionaisAtri
             elif (word in tokensLogicosRelacionaisAtriRegras) and not modoString and not dentroComentario:
-                tokensLogicosRelacionaisAtri.append(word)
+                tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',word,linha,coluna])
                 coluna =+ (len(word))
                 continue
             
@@ -97,20 +99,20 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     string+=caractere
                     if caractere == "'":
                         modoString = False
-                        stringsArray.append(string[:-1])
+                        stringsArray.append(['tkn_string',string[:-1],linha,coluna])
                         string = ""
                     continue  
                
                 # verifica se o caractere é um espaço
                 if (caractere == '\s'):
-                   if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas):
+                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna):
                         variableBuilder = "" 
                         continue
                 
                 # verifica se o caractere é um tokensAritimeticos
                 if (caractere in tokensAritimeticosRegras) and not modoString and not dentroComentario:
-                    tokensAritimeticos.append(caractere)
-                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas):
+                    tokensAritimeticos.append(['tkn_aritimetico',caractere,linha,coluna])
+                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna):
                         variableBuilder = "" 
                         continue
                     continue
@@ -121,17 +123,17 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     posicao = line.find(caractere)
                     newCaractere = caractere+line[posicao+1]
                     if  (newCaractere  in tokensLogicosRelacionaisAtriRegras):
-                        tokensLogicosRelacionaisAtri.append(newCaractere)
+                        tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',newCaractere, linha, coluna])
                         variableBuilder = ""  # Reinicia para o próximo número
                         continue
 
     
-                    tokensLogicosRelacionaisAtri.append(caractere)
-                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas):
+                    tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',caractere,linha,coluna])
+                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna):
                         variableBuilder = "" 
                         continue
                     continue
-
+                    
                 # Se não é um dígito, mas temos um número acumulado, verifique se é um flutuante
                 elif (caractere.isdigit() or caractere == '.') and variableBuilder == "" and not modoString and not dentroComentario:
                     numero += caractere
@@ -147,13 +149,13 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 # Se não é um dígito, mas temos um número acumulado, verifique se é um inteiro
                 elif numero and (variableBuilder == "") and (not caractere.isdigit() or caractere == word[-1]) and not modoString and not dentroComentario and (numerberType == "int"):
                     if re.fullmatch(intRegex, numero):
-                        inteirosArray.append(int(numero))
+                        inteirosArray.append(['tkn_inteiro',int(numero),linha,coluna])
                     numero = "" 
                     
                 # Finaliza a construção do número flutuante quando encontra um caractere não numérico ou fim da palavra
                 elif numero and (not caractere.isdigit() and (caractere != '.' or caractere == word[-1])):
                     if re.fullmatch(floatRegex, numero):
-                        floatsArray.append(float(numero))
+                        floatsArray.append(['tkn_float',float(numero),linha,coluna])
                         numero = ""  
                     continue
             
@@ -164,10 +166,10 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     # condicional para não querbrar caso seja o ultimo caractere da linha
                     if (caractere not in word[-1]):
                         if(line[indice+1] == "="):
-                            tokensLogicosRelacionaisAtri.append(caractere+line[indice+1])
+                            tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',caractere+line[indice+1],linha,coluna])
                             continue
-                    tokensSimbolos.append(caractere)
-                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas):
+                    tokensSimbolos.append(['tkn_simbolo',caractere,linha,coluna])
+                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna):
                         variableBuilder = "" 
                         continue
                     continue
@@ -195,7 +197,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     coluna += 1
                     if caractere == '}':
                         dentroComentario = False
-                        comentariosArray.append(textoComentario)  # Adiciona o comentário acumulado ao array
+                        comentariosArray.append(['tkn_comentario',textoComentario,linha,coluna])  # Adiciona o comentário acumulado ao array
                         textoComentario = ""  # Reinicia para o próximo comentário
                     continue
 
@@ -270,14 +272,8 @@ tokensSimbolosRegras: List[str] = [
     ')',
 ]
 
-# tokens = {
-#     'tokensAritimeticosRegras': tokensAritimeticosRegras,
-#     'tokensLogicosRelacionaisAtriRegras': tokensLogicosRelacionaisAtriRegras,
-#     'palavrasReservadasRegr': palavrasReservadasRegr,
-#     'tokensSimbolos': tokensSimbolos
-# }
 
-diretorio = 'listas\lista1\EXS22.pas'
+diretorio = 'listas\lista1\EXS1.pas'
 
 pascalExercise = open( diretorio, 'r')
 pascalExerciseContent = pascalExercise.read()
