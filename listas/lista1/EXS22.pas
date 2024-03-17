@@ -26,11 +26,11 @@ begin;
  writeln ('entao digite 2.');
  readln (tempo);
 
- //entao se le o sal rio e o tempo de servi‡o do usuario.
+ //entao se le o salï¿½rio e o tempo de serviï¿½o do usuario.
 
  clrscr;
 
- //a primeira cadeia de ifs ‚ para determinar o valor de imposto pago pelo usuario de acordo com seu salario.
+ //a primeira cadeia de ifs ï¿½ para determinar o valor de imposto pago pelo usuario de acordo com seu salario.
 
   if (sal >= 700) then
      begin
@@ -53,8 +53,8 @@ begin;
                              end;
 
 
-  //a segunda cadeia de ifs ‚ para determinar o valor da gratifica‡Æo do usuario de acordo com seu sal rio,
-  //e tempo de servi‡o.
+  //a segunda cadeia de ifs ï¿½ para determinar o valor da gratificaï¿½ï¿½o do usuario de acordo com seu salï¿½rio,
+  //e tempo de serviï¿½o.
 
   if  (sal > 500) then
       begin
@@ -90,12 +90,12 @@ begin;
               end;
 
 
-  //se calcula o valor do sal rio liquido da seguinte forma:
-  //salario - imposto - a gratifica‡Æo que foram obtidos acima.
+  //se calcula o valor do salï¿½rio liquido da seguinte forma:
+  //salario - imposto - a gratificaï¿½ï¿½o que foram obtidos acima.
 
   sal_liq:= sal-imp+grat;
 
-  //entÆo se come‡a uma cadeia de ifs para determinar a classifica‡Æo do usuario de acordo com seu sal rio liquido.
+  //entï¿½o se comeï¿½a uma cadeia de ifs para determinar a classificaï¿½ï¿½o do usuario de acordo com seu salï¿½rio liquido.
 
   if (sal_liq >= 600) then
      begin
@@ -112,7 +112,7 @@ begin;
                      clas:= 'A';
                      end;
 
- //a £nica coisa restante a se fazer ‚ mostrar ao usuario os resultados.
+ //a ï¿½nica coisa restante a se fazer ï¿½ mostrar ao usuario os resultados.
 
  writeln ('caro usuario o imposto pago por voce e de ', imp:4:2, ' .');
  writeln ('a gratificacao e de ', grat, ' .');
