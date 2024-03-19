@@ -7,10 +7,9 @@ from typing import List
 
 def variableBuilded(variableRegex, variaveis, buildedVariable,palavrasReservadas,linha,coluna,lista,line):
     if buildedVariable != "" and re.fullmatch(variableRegex, buildedVariable) and (buildedVariable not in palavrasReservadas) :
-        if buildedVariable not in variaveis:
-            coluna = line.find(buildedVariable)
-            variaveis.append(['tkn_variaveis',buildedVariable,linha,coluna+1])
-            lista.append(['tkn_variaveis',buildedVariable,linha,coluna+1])
+        coluna = line.find(buildedVariable)
+        variaveis.append(['tkn_variaveis',buildedVariable,linha,coluna+1])
+        lista.append(['tkn_variaveis',buildedVariable,linha,coluna+1])
         return True
     elif buildedVariable != "" and buildedVariable in palavrasReservadasRegras:
         coluna = line.find(buildedVariable)
@@ -118,24 +117,22 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     string+=caractere
                     if caractere == "'":
                         modoString = False
-                        coluna = line.find(word)
+                        coluna += 1
                         stringsArray.append(['tkn_string',string[:-1],linha,coluna+1])
-                        coluna = line.find(word)
                         lista.append(['tkn_string',string[:-1],linha,coluna+1])
                         string = ""
                     continue  
                
                 # verifica se o caractere é um espaço
-                if (caractere == '\s'):
+                if (caractere == r'\s'):
                     if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
                         variableBuilder = "" 
                         continue
                 
                 # verifica se o caractere é um tokensAritimeticos
                 if (caractere in tokensAritimeticosRegras) and not modoString and not dentroComentario:
-                    coluna = line.find(word)
+                    coluna += 1
                     tokensAritimeticos.append(['tkn_aritimetico',caractere,linha,coluna+1])
-                    coluna = line.find(word)
                     lista.append(['tkn_aritimetico',caractere,linha,coluna+1])
                     if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
                         variableBuilder = "" 
@@ -148,17 +145,13 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     posicao = line.find(caractere)
                     newCaractere = caractere+line[posicao+1]
                     if  (newCaractere  in tokensLogicosRelacionaisAtriRegras):
-                        coluna = line.find(word)
+                        coluna += 1
                         tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',newCaractere, linha, coluna])
-                        coluna = line.find(word)
                         lista.append(['tkn_logicos_relacionais_atributos',newCaractere, linha, coluna])
                         variableBuilder = ""  # Reinicia para o próximo número
                         continue
-
-    
-                    coluna = line.find(word)
+                    coluna += 1
                     tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',caractere,linha,coluna+1])
-                    coluna = line.find(word)
                     lista.append(['tkn_logicos_relacionais_atributos',caractere,linha,coluna+1])
                     if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
                         variableBuilder = "" 
@@ -180,18 +173,16 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 # Se não é um dígito, mas temos um número acumulado, verifique se é um inteiro
                 elif numero and (variableBuilder == "") and (not caractere.isdigit() or caractere == word[-1]) and not modoString and not dentroComentario and (numerberType == "int"):
                     if re.fullmatch(intRegex, numero):
-                        coluna = line.find(word)
+                        coluna += 1
                         inteirosArray.append(['tkn_inteiro',int(numero),linha,coluna+1])
-                        coluna = line.find(word)
                         lista.append(['tkn_inteiro',int(numero),linha,coluna+1])
                     numero = "" 
                     
                 # Finaliza a construção do número flutuante quando encontra um caractere não numérico ou fim da palavra
                 elif numero and (not caractere.isdigit() and (caractere != '.' or caractere == word[-1])):
                     if re.fullmatch(floatRegex, numero):
-                        coluna = line.find(word)
+                        coluna += 1
                         floatsArray.append(['tkn_float',float(numero),linha,coluna+1])
-                        coluna = line.find(word)
                         lista.append(['tkn_float',float(numero),linha,coluna+1])
                         numero = ""  
                     continue
@@ -203,9 +194,8 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     # condicional para não querbrar caso seja o ultimo caractere da linha
                     if (caractere not in word[-1]):
                         if(line[indice+1] == "="):
-                            coluna = line.find(word)
+                            coluna += 1
                             tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',caractere+line[indice+1],linha,coluna+1])
-                            coluna = line.find(word)
                             lista.append(['tkn_logicos_relacionais_atributos',caractere+line[indice+1],linha,coluna+1])
                             continue
                     coluna = line.find(caractere)
@@ -247,7 +237,14 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     continue
 
                 coluna = 0
-
+            if(variableBuilder != ""):
+                if(re.fullmatch(variableRegex,variableBuilder) and not (variableBuilder in palavrasReservadasRegras)):
+                    separatorindex = line.find(';')
+                    variaveis.append(['tkn_variaveis',variableBuilder,linha,separatorindex+2])
+                    lista.append(['tkn_variaveis',variableBuilder,linha,separatorindex+2])
+                elif(variableBuilder in palavrasReservadasRegras):
+                    palavrasReservadas.append(['tkn_palavras_reservadas',variableBuilder,linha,separatorindex+2])
+                    lista.append(['tkn_palavras_reservadas',variableBuilder,linha,separatorindex+2])
             variableBuilder = ""
 
     tokensDict = {
@@ -318,7 +315,7 @@ tokensSimbolosRegras: List[str] = [
 ]
 
 
-diretorio = 'listas\lista1\EXS1.pas'
+diretorio = r'listas\lista1\EXS1.pas'
 
 pascalExercise = open( diretorio, 'r')
 pascalExerciseContent = pascalExercise.read()

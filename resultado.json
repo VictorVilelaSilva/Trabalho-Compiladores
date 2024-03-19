@@ -141,7 +141,7 @@
         "tkn_string",
         "caro usuario este programa calculara 3 notas com seus respesquitivos pesos e a media da nota sera o conceito recebido.",
         10,
-        121
+        11
     ],
     [
         "tkn_simbolo",
@@ -171,7 +171,7 @@
         "tkn_string",
         "para comecar aperte enter ",
         11,
-        36
+        9
     ],
     [
         "tkn_simbolo",
@@ -225,7 +225,7 @@
         "tkn_string",
         "primeiro declare a nota do trabalho de laboratorio com peso 2 ",
         15,
-        74
+        11
     ],
     [
         "tkn_simbolo",
@@ -297,7 +297,7 @@
         "tkn_string",
         "agora declare a nota da avaliacao semestral com peso 3 ",
         19,
-        67
+        11
     ],
     [
         "tkn_simbolo",
@@ -369,7 +369,7 @@
         "tkn_string",
         "por fim declare a nota do exame final com peso 5 ",
         23,
-        61
+        11
     ],
     [
         "tkn_simbolo",
@@ -447,7 +447,7 @@
         "tkn_aritimetico",
         "*",
         30,
-        7
+        8
     ],
     [
         "tkn_variaveis",
@@ -459,13 +459,13 @@
         "tkn_inteiro",
         2,
         30,
-        7
+        9
     ],
     [
         "tkn_aritimetico",
         "+",
         30,
-        7
+        2
     ],
     [
         "tkn_simbolo",
@@ -477,7 +477,7 @@
         "tkn_aritimetico",
         "*",
         30,
-        7
+        8
     ],
     [
         "tkn_variaveis",
@@ -489,13 +489,13 @@
         "tkn_inteiro",
         3,
         30,
-        7
+        9
     ],
     [
         "tkn_aritimetico",
         "+",
         30,
-        7
+        2
     ],
     [
         "tkn_simbolo",
@@ -507,7 +507,7 @@
         "tkn_aritimetico",
         "*",
         30,
-        7
+        8
     ],
     [
         "tkn_variaveis",
@@ -519,7 +519,7 @@
         "tkn_inteiro",
         5,
         30,
-        7
+        9
     ],
     [
         "tkn_simbolo",
@@ -531,13 +531,13 @@
         "tkn_aritimetico",
         "/",
         30,
-        7
+        14
     ],
     [
         "tkn_inteiro",
         10,
         30,
-        7
+        15
     ],
     [
         "tkn_simbolo",
@@ -585,13 +585,13 @@
         "tkn_logicos_relacionais_atributos",
         "<=",
         37,
-        4
+        5
     ],
     [
         "tkn_inteiro",
         10,
         37,
-        5
+        2
     ],
     [
         "tkn_logicos_relacionais_atributos",
@@ -609,13 +609,13 @@
         "tkn_logicos_relacionais_atributos",
         ">=",
         37,
-        18
+        5
     ],
     [
         "tkn_inteiro",
         8,
         37,
-        19
+        2
     ],
     [
         "tkn_simbolo",
@@ -651,7 +651,7 @@
         "tkn_string",
         "caro usuario sua media e ",
         39,
-        43
+        17
     ],
     [
         "tkn_simbolo",
@@ -675,19 +675,19 @@
         "tkn_inteiro",
         4,
         39,
-        46
+        49
     ],
     [
         "tkn_inteiro",
         2,
         39,
-        46
+        2
     ],
     [
         "tkn_string",
         " e seu conceito e A",
         39,
-        73
+        2
     ],
     [
         "tkn_simbolo",
@@ -729,7 +729,7 @@
         "tkn_logicos_relacionais_atributos",
         "<",
         42,
-        18
+        19
     ],
     [
         "tkn_variaveis",
@@ -741,7 +741,7 @@
         "tkn_inteiro",
         8,
         42,
-        18
+        20
     ],
     [
         "tkn_logicos_relacionais_atributos",
@@ -759,13 +759,13 @@
         "tkn_logicos_relacionais_atributos",
         ">=",
         42,
-        28
+        18
     ],
     [
         "tkn_inteiro",
         7,
         42,
-        29
+        2
     ],
     [
         "tkn_palavras_reservadas",
@@ -795,7 +795,7 @@
         "tkn_string",
         "caro usuario sua media e ",
         44,
-        55
+        29
     ],
     [
         "tkn_simbolo",
@@ -819,19 +819,19 @@
         "tkn_inteiro",
         4,
         44,
-        58
+        61
     ],
     [
         "tkn_inteiro",
         2,
         44,
-        58
+        2
     ],
     [
         "tkn_string",
         " e seu conceito e B",
         44,
-        85
+        2
     ],
     [
         "tkn_simbolo",
@@ -873,7 +873,7 @@
         "tkn_logicos_relacionais_atributos",
         "<",
         47,
-        28
+        29
     ],
     [
         "tkn_variaveis",
@@ -885,7 +885,7 @@
         "tkn_inteiro",
         7,
         47,
-        28
+        30
     ],
     [
         "tkn_logicos_relacionais_atributos",
@@ -903,13 +903,13 @@
         "tkn_logicos_relacionais_atributos",
         ">=",
         47,
-        38
+        28
     ],
     [
         "tkn_inteiro",
         6,
         47,
-        39
+        2
     ],
     [
         "tkn_palavras_reservadas",
@@ -939,7 +939,7 @@
         "tkn_string",
         "caro usuario sua media e ",
         49,
-        68
+        42
     ],
     [
         "tkn_simbolo",
@@ -963,19 +963,19 @@
         "tkn_inteiro",
         4,
         49,
-        71
+        74
     ],
     [
         "tkn_inteiro",
         2,
         49,
-        71
+        2
     ],
     [
         "tkn_string",
         " e seu conceito e C",
         49,
-        98
+        2
     ],
     [
         "tkn_simbolo",
@@ -1017,7 +1017,7 @@
         "tkn_logicos_relacionais_atributos",
         "<",
         52,
-        41
+        42
     ],
     [
         "tkn_variaveis",
@@ -1029,7 +1029,7 @@
         "tkn_inteiro",
         6,
         52,
-        41
+        43
     ],
     [
         "tkn_logicos_relacionais_atributos",
@@ -1047,13 +1047,13 @@
         "tkn_logicos_relacionais_atributos",
         ">=",
         52,
-        51
+        41
     ],
     [
         "tkn_inteiro",
         5,
         52,
-        52
+        2
     ],
     [
         "tkn_palavras_reservadas",
@@ -1107,19 +1107,19 @@
         "tkn_inteiro",
         4,
         54,
-        85
+        88
     ],
     [
         "tkn_inteiro",
         2,
         54,
-        85
+        2
     ],
     [
         "tkn_string",
         " e seu conceito e D",
         54,
-        112
+        2
     ],
     [
         "tkn_simbolo",
@@ -1161,7 +1161,7 @@
         "tkn_logicos_relacionais_atributos",
         "<",
         57,
-        54
+        55
     ],
     [
         "tkn_variaveis",
@@ -1173,7 +1173,7 @@
         "tkn_inteiro",
         5,
         57,
-        54
+        56
     ],
     [
         "tkn_logicos_relacionais_atributos",
@@ -1191,13 +1191,13 @@
         "tkn_logicos_relacionais_atributos",
         ">=",
         57,
-        64
+        54
     ],
     [
         "tkn_inteiro",
         0,
         57,
-        65
+        2
     ],
     [
         "tkn_palavras_reservadas",
@@ -1227,7 +1227,7 @@
         "tkn_string",
         "caro usuario sua media e ",
         59,
-        94
+        68
     ],
     [
         "tkn_simbolo",
@@ -1251,19 +1251,19 @@
         "tkn_inteiro",
         4,
         59,
-        97
+        100
     ],
     [
         "tkn_inteiro",
         2,
         59,
-        97
+        2
     ],
     [
         "tkn_string",
         " e seu conceito e E",
         59,
-        124
+        2
     ],
     [
         "tkn_simbolo",
@@ -1305,7 +1305,7 @@
         "tkn_string",
         " ",
         62,
-        13
+        11
     ],
     [
         "tkn_simbolo",
@@ -1335,7 +1335,7 @@
         "tkn_string",
         "para encerrar o programa aperte qualquer tecla.",
         63,
-        51
+        9
     ],
     [
         "tkn_simbolo",

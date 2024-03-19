@@ -1,8 +1,4 @@
-program exs2;
-
-uses crt;
-
-var n1,n2,n3,media,exame: real;
+program exs2;uses crt;var n1,n2,n3,media,exame: real;
 
 begin;
 
@@ -25,8 +21,8 @@ begin;
 
  //aqui se descobre a media do usuario somando as notas e as dividindo por 3
 
- //porem a nota do exame, que ‚ a nota que o usuario precisa tirar, se pega a media que ele precisa tirar para passar
- //que no caso ‚ 6 e, subtrai pela media dele das notas que ele tirou.
+ //porem a nota do exame, que ï¿½ a nota que o usuario precisa tirar, se pega a media que ele precisa tirar para passar
+ //que no caso ï¿½ 6 e, subtrai pela media dele das notas que ele tirou.
 
  media:= (n1+n2+n3)/3;
  exame:= 6-media;
