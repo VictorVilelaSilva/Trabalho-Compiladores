@@ -59,7 +59,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
             coluna = line.find(word)
             lista.append(['tkn_comentarios',tempLine,linha,coluna+1])
             
-            linha += 1
+            linha += 1 #talves possa ocorer problemas aqui
             continue
 
         # percorre a linha por palavra
@@ -67,12 +67,10 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
      
             # if not line.startswith(word) and not word.isspace(): 
                 
-            
             #faz com que ocorra uma espaco entre as palavras da string
             if(modoString):
                 string += " "
                 
-
             
             # verifica se a palavra é uma palavra reservada
             if (word in palavrasReservadasRegras) and not modoString and not dentroComentario:
@@ -172,6 +170,15 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
 
                 # Se não é um dígito, mas temos um número acumulado, verifique se é um inteiro
                 elif numero and (variableBuilder == "") and (not caractere.isdigit() or caractere == word[-1]) and not modoString and not dentroComentario and (numerberType == "int"):
+                    #se o caractere é uma letra
+                    if (caractere.isalpha()):
+                        caractererInd = line.find(caractere)
+                        print(f"Erro na linha {linha} coluna {indice}")
+                        print(line)
+                        #indicar a linha exata da linha
+                        print(" "*(indice) + "^")
+                        print("Erro: Lexema inválido")
+                        exit() 
                     if re.fullmatch(intRegex, numero):
                         coluna += 1
                         inteirosArray.append(['tkn_inteiro',int(numero),linha,coluna+1])
@@ -197,6 +204,9 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                             coluna += 1
                             tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',caractere+line[indice+1],linha,coluna+1])
                             lista.append(['tkn_logicos_relacionais_atributos',caractere+line[indice+1],linha,coluna+1])
+                            if(variableBuilder != ""): #resolvendo n4:= linha 30 coluna                            #     variaveis.append(['tkn_variaveis',variableBuilder,linha,coluna+1])
+                                lista.append(['tkn_variaveis',variableBuilder,linha,coluna+1])
+                                variableBuilder = ""
                             continue
                     coluna = line.find(caractere)
                     tokensSimbolos.append(['tkn_simbolo',caractere,linha,coluna+1])
@@ -213,6 +223,8 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
 
                 # verifica se o caractere é um string
                 elif caractere == "'" and not dentroComentario:
+                    stringStart = line.find(caractere)
+                    linhaString = linha
                     modoString = True
                     continue
                 
@@ -245,7 +257,12 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 elif(variableBuilder in palavrasReservadasRegras):
                     palavrasReservadas.append(['tkn_palavras_reservadas',variableBuilder,linha,separatorindex+2])
                     lista.append(['tkn_palavras_reservadas',variableBuilder,linha,separatorindex+2])
+                else:
+                    print(f"Essa merda => {variableBuilder} não existe 👌. Linha:{linha} Coluna: {coluna}") 
+                    exit()
+            
             variableBuilder = ""
+            
 
     tokensDict = {
         'tokensAritimeticos': tokensAritimeticos,
