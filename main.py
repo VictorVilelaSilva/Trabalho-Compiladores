@@ -2,8 +2,12 @@ import json
 import re
 from typing import List
 
+from enum import Enum
+
 #####################################Analisador Léxico (Pascal)################################
 # percorre o arquivo e retorna os tokens
+
+padrao = r'([a-zA-Z][a-zA-Z0-9_]*|<>|==|:=|>=|<=|<|>|:|[\d.]+|[a-zA-Z0-9]+|\S)'
 
 def variableBuilded(variableRegex, variaveis, buildedVariable,palavrasReservadas,linha,coluna,lista,line):
     if buildedVariable != "" and re.fullmatch(variableRegex, buildedVariable) and (buildedVariable not in palavrasReservadas) :
@@ -18,6 +22,15 @@ def variableBuilded(variableRegex, variaveis, buildedVariable,palavrasReservadas
         return True
     return False
 
+def is_integer(s):
+    return s.isdigit()
+
+def is_float(s):
+    try:
+        float_value = float(s)
+        return True
+    except ValueError:
+        return False
 
 def getTokens(pascalExerciseContent: str) -> List[dict]:
 
@@ -63,8 +76,8 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
             continue
 
         # percorre a linha por palavra
-        for word in line.split(' '):
-     
+        for word in re.findall(padrao, line):
+           
             # if not line.startswith(word) and not word.isspace(): 
                 
             #faz com que ocorra uma espaco entre as palavras da string
@@ -76,40 +89,86 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
             if (word in palavrasReservadasRegras) and not modoString and not dentroComentario:
                 coluna = line.find(word)
                 palavrasReservadas.append(['tkn_palavras_reservadas',word,linha,coluna+1])
-                lista.append(['tkn_palavras_reservadas',word,linha,coluna+1])
+                lista.append([obter_valor_simbolo(word),word,linha,coluna+1])
+                coluna =+ (len(word))
+                continue
+            elif (is_float(word)):
+                coluna = line.find(word)
+                simbolo = 'tkn_float'
+                lista.append([obter_valor_simbolo(simbolo), word,linha,coluna+1])
                 coluna =+ (len(word))
                 continue
             
+            elif (is_integer(word)):
+                coluna = line.find(word)
+                simbolo = 'tkn_int'
+                lista.append([obter_valor_simbolo(simbolo), word,linha,coluna+1])
+                coluna =+ (len(word))
+                continue
+            
+            
             # verifica se a palavra não é uma palavra reservada e é uma variável
             elif (word not in palavrasReservadasRegras) and (word not in tokensLogicosRelacionaisAtriRegras)and (re.fullmatch(variableRegex, word) and not modoString and not dentroComentario):
-                if(word[-1] == ';'):
-                    coluna = line.find(word)
-                    variaveis.append(word)
-                    lista.append(['tkn_variaveis',word,linha,coluna+1])
-                    coluna = line.find(word-1)
-                    tokensSimbolos.append(['tkn_simbolo',word-1,linha,coluna+1])
-                    lista.append(['tkn_simbolo',word-1,linha,coluna+1])
-                    continue
                 coluna = line.find(word)
-                variaveis.append(['tkn_variaveis',word,linha,coluna+1])
-                coluna = line.find(word)
-                lista.append(['tkn_variaveis',word,linha,coluna+1])
+                simbolo = 'tkn_variaveis'
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
                 coluna =+ (len(word))
                 continue
 
             # verifica se a palavra é um tokensLogicosRelacionaisAtri
             elif (word in tokensLogicosRelacionaisAtriRegras) and not modoString and not dentroComentario:
                 coluna = line.find(word)
-                tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',word,linha,coluna+1])
-                coluna = line.find(word)
-                lista.append(['tkn_logicos_relacionais_atributos',word,linha,coluna+1])
+                if(word == "<>"):
+                    simbolo = 'tkn_maiormenor'
+                elif(word == ">"):
+                    simbolo = 'tkn_maior'
+                elif(word == ">="):
+                    simbolo = 'tkn_maiorigual'
+                elif(word == "<"):
+                    simbolo = 'tkn_menor'
+                elif(word == "<="):
+                    simbolo = 'tkn_menorigual'
+                elif(word == ":="):
+                    simbolo = 'tkn_atribuicao'
+                elif(word == "=="):
+                    simbolo = 'tkn_igualdade'  
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
                 coluna =+ (len(word))
+                continue
+            
+            # verifica se o caractere é um tokensAritimeticos
+            elif (word in tokensAritimeticosRegras) and not modoString and not dentroComentario:
+                coluna = line.find(word)
+                if(word == "+"):
+                    simbolo = "tkn_adicao"
+                elif(word == "-"):
+                    simbolo = "tkn_subtracao"
+                elif(word == "*"):
+                    simbolo = "tkn_multiplicacao"
+                elif(word == "/"):
+                    simbolo = "tkn_divisao"
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
+                continue
+            # verifica se o caractere é um tokenSimbolo
+            elif(word in tokensSimbolosRegras) and not modoString and not dentroComentario:
+                if(word == ";"):
+                    simbolo = "tkn_pontoevirgula"
+                elif(word == ","):
+                        simbolo = "tkn_virgula"
+                elif(word == "."):
+                        simbolo = "tkn_ponto"
+                elif(word == ":"):
+                        simbolo = "tkn_doispontos"
+                elif(word == "("):
+                        simbolo = "tkn_abreparentese"
+                elif(word == ")"):
+                        simbolo = "tkn_fechaparentese"
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
                 continue
             
             # percorre a palavra por caractere
             for caractere in word:
-                
-
+            
                 # verifica se esta no modo string
                 if modoString:
                     string+=caractere
@@ -117,7 +176,8 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                         modoString = False
                         coluna += 1
                         stringsArray.append(['tkn_string',string[:-1],linha,coluna+1])
-                        lista.append(['tkn_string',string[:-1],linha,coluna+1])
+                        simbolo = 'tkn_string'
+                        lista.append([obter_valor_simbolo(simbolo),string[:-1],linha,coluna+1])
                         string = ""
                     continue  
                
@@ -126,100 +186,6 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
                         variableBuilder = "" 
                         continue
-                
-                # verifica se o caractere é um tokensAritimeticos
-                if (caractere in tokensAritimeticosRegras) and not modoString and not dentroComentario:
-                    coluna += 1
-                    tokensAritimeticos.append(['tkn_aritimetico',caractere,linha,coluna+1])
-                    lista.append(['tkn_aritimetico',caractere,linha,coluna+1])
-                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
-                        variableBuilder = "" 
-                        continue
-                    continue
-
-                # verifica se o caractere é um tokensLogicosRelacionaisAtri
-                elif (caractere in tokensLogicosRelacionaisAtriRegras) and not modoString and not dentroComentario:
-                    #achar a possição do caractere na linha
-                    posicao = line.find(caractere)
-                    newCaractere = caractere+line[posicao+1]
-                    if  (newCaractere  in tokensLogicosRelacionaisAtriRegras):
-                        coluna += 1
-                        tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',newCaractere, linha, coluna])
-                        lista.append(['tkn_logicos_relacionais_atributos',newCaractere, linha, coluna])
-                        variableBuilder = ""  # Reinicia para o próximo número
-                        continue
-                    coluna += 1
-                    tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',caractere,linha,coluna+1])
-                    lista.append(['tkn_logicos_relacionais_atributos',caractere,linha,coluna+1])
-                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
-                        variableBuilder = "" 
-                        continue
-                    continue
-                    
-                # Se não é um dígito, mas temos um número acumulado, verifique se é um flutuante
-                elif (caractere.isdigit() or caractere == '.') and variableBuilder == "" and not modoString and not dentroComentario:
-                    numero += caractere
-                    indice = line.find(caractere)
-            
-                    if caractere == '.' and line[indice+1].isdigit():
-                        numerberType = "float"
-                        continue
-                    elif not '.' in numero:
-                        numerberType = "int"
-                        continue
-
-                # Se não é um dígito, mas temos um número acumulado, verifique se é um inteiro
-                elif numero and (variableBuilder == "") and (not caractere.isdigit() or caractere == word[-1]) and not modoString and not dentroComentario and (numerberType == "int"):
-                    #se o caractere é uma letra
-                    if (caractere.isalpha()):
-                        caractererInd = line.find(caractere)
-                        print(f"Erro na linha {linha} coluna {indice}")
-                        print(line)
-                        #indicar a linha exata da linha
-                        print(" "*(indice) + "^")
-                        print("Erro: Lexema inválido")
-                        exit() 
-                    if re.fullmatch(intRegex, numero):
-                        coluna += 1
-                        inteirosArray.append(['tkn_inteiro',int(numero),linha,coluna+1])
-                        lista.append(['tkn_inteiro',int(numero),linha,coluna+1])
-                    numero = "" 
-                    
-                # Finaliza a construção do número flutuante quando encontra um caractere não numérico ou fim da palavra
-                elif numero and (not caractere.isdigit() and (caractere != '.' or caractere == word[-1])):
-                    if re.fullmatch(floatRegex, numero):
-                        coluna += 1
-                        floatsArray.append(['tkn_float',float(numero),linha,coluna+1])
-                        lista.append(['tkn_float',float(numero),linha,coluna+1])
-                        numero = ""  
-                    continue
-            
-
-                # verifica se o caractere é um tokensSimbolos
-                elif (caractere in tokensSimbolosRegras) and not modoString and not dentroComentario:
-                    indice = line.find(caractere)
-                    # condicional para não querbrar caso seja o ultimo caractere da linha
-                    if (caractere not in word[-1]):
-                        if(line[indice+1] == "="):
-                            coluna += 1
-                            tokensLogicosRelacionaisAtri.append(['tkn_logicos_relacionais_atributos',caractere+line[indice+1],linha,coluna+1])
-                            lista.append(['tkn_logicos_relacionais_atributos',caractere+line[indice+1],linha,coluna+1])
-                            if(variableBuilder != ""): #resolvendo n4:= linha 30 coluna                            #     variaveis.append(['tkn_variaveis',variableBuilder,linha,coluna+1])
-                                lista.append(['tkn_variaveis',variableBuilder,linha,coluna+1])
-                                variableBuilder = ""
-                            continue
-                    coluna = line.find(caractere)
-                    tokensSimbolos.append(['tkn_simbolo',caractere,linha,coluna+1])
-                    lista.append(['tkn_simbolo',caractere,linha,coluna+1])
-                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
-                        variableBuilder = "" 
-                        continue
-                    continue
-
-                elif (re.match(variableRegex, caractere) and not modoString and not dentroComentario) or (variableBuilder != ""):
-                    variableBuilder += caractere
-                    continue
-
 
                 # verifica se o caractere é um string
                 elif caractere == "'" and not dentroComentario:
@@ -244,24 +210,20 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                         coluna = line.find(word)
                         comentariosArray.append(['tkn_comentario',textoComentario,linha,coluna+1])  # Adiciona o comentário acumulado ao array
                         coluna = line.find(word)
-                        lista.append(['tkn_comentario',textoComentario,linha,coluna+1])  # Adiciona o comentário acumulado ao array
+                        simbolo = 'tkn_comentario'
+                        lista.append([obter_valor_simbolo(simbolo),textoComentario,linha,coluna+1])  # Adiciona o comentário acumulado ao array
                         textoComentario = ""  # Reinicia para o próximo comentário
                     continue
 
-                coluna = 0
-            if(variableBuilder != ""):
-                if(re.fullmatch(variableRegex,variableBuilder) and not (variableBuilder in palavrasReservadasRegras)):
-                    separatorindex = line.find(';')
-                    variaveis.append(['tkn_variaveis',variableBuilder,linha,separatorindex+2])
-                    lista.append(['tkn_variaveis',variableBuilder,linha,separatorindex+2])
-                elif(variableBuilder in palavrasReservadasRegras):
-                    palavrasReservadas.append(['tkn_palavras_reservadas',variableBuilder,linha,separatorindex+2])
-                    lista.append(['tkn_palavras_reservadas',variableBuilder,linha,separatorindex+2])
                 else:
-                    print(f"Essa merda => {variableBuilder} não existe 👌. Linha:{linha} Coluna: {coluna}") 
-                    exit()
+                    indice = line.find(word)
+                    print(f"Erro na linha {linha} coluna {indice}")
+                    print(line)
+                    #indicar a linha exata da linha
+                    print(" "*(indice) + "^")
+                    print("Erro: Lexema inválido")
+                    exit() 
             
-            variableBuilder = ""
             
 
     tokensDict = {
@@ -282,22 +244,17 @@ tokensAritimeticosRegras: List[str] = [
     '+',
     '-',
     '*',
-    '/',
-    'mod',
-    'div'
+    '/'
 ]
 
 tokensLogicosRelacionaisAtriRegras: List[str]  = [
-    'or',
-    'and',
-    'not',
-    '==',
     '<>',
     '>',
     '>=',
     '<',
     '<=',
-    ':='   
+    ':=',
+    '==' 
 ]
 
 palavrasReservadasRegras: List[str] = [
@@ -319,7 +276,12 @@ palavrasReservadasRegras: List[str] = [
     'else',
     'then',
     'write',
-    'read'
+    'read',
+    'mod',
+    'div',
+    'or',
+    'and',
+    'not',
 ]
 
 tokensSimbolosRegras: List[str] = [
@@ -331,6 +293,61 @@ tokensSimbolosRegras: List[str] = [
     ')',
 ]
 
+class Tokens(Enum):
+    PROGRAM = 1
+    VAR = 2
+    INTEGER = 3
+    REAL = 4
+    STRING = 5
+    BEGIN = 6
+    BOOLEAN = 7
+    END = 8
+    FOR = 9
+    TO = 10
+    WHILE = 11
+    DO = 12
+    BREAK = 13
+    CONTINUE = 14
+    IF = 15
+    ELSE = 16
+    THEN = 17
+    WRITE = 18
+    READ = 19
+    OR = 20
+    AND = 21
+    NOT = 22
+    MOD = 23
+    DIV = 24
+    TKN_VARIAVEIS = 100
+    TKN_INT = 101
+    TKN_MAIORMENOR = 102
+    TKN_MAIOR = 103
+    TKN_MAIORIGUAL = 104
+    TKN_MENOR = 105
+    TKN_MENORIGUAL = 106
+    TKN_ATRIBUICAO = 107
+    TKN_ADICAO = 108
+    TKN_SUBTRACAO = 109
+    TKN_MULTIPLICACAO = 110
+    TKN_DIVISAO = 111
+    TKN_FLOAT = 112
+    TKN_PONTOEVIRGULA = 113
+    TKN_VIRGULA = 114
+    TKN_PONTO = 115
+    TKN_DOISPONTOS = 116
+    TKN_ABREPARENTESE = 117
+    TKN_FECHAPARENTESE = 118
+    TKN_COMENTARIO = 119
+    TKN_STRING = 120
+    TKN_IGUALDADE = 121
+    
+
+def obter_valor_simbolo(simbolo):
+    try:
+        enum_simbolo = Tokens[simbolo.upper()]
+        return enum_simbolo.value
+    except KeyError:
+        return None
 
 diretorio = r'listas\lista1\EXS1.pas'
 
