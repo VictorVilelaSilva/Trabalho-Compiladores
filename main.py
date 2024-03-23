@@ -7,18 +7,18 @@ from enum import Enum
 #####################################Analisador Léxico (Pascal)################################
 # percorre o arquivo e retorna os tokens
 
-padrao = r'([a-zA-Z][a-zA-Z0-9_]*|<>|==|:=|>=|<=|<|>|:|[\d.]+|[a-zA-Z0-9]+|\s)'
+padrao = r'([a-zA-Z][a-zA-Z0-9_]*|<>|==|:=|>=|<=|<|>|:|[\d.]+|[a-zA-Z0-9]+| |\S)'
 
 def variableBuilded(variableRegex, variaveis, buildedVariable,palavrasReservadas,linha,coluna,lista,line):
     if buildedVariable != "" and re.fullmatch(variableRegex, buildedVariable) and (buildedVariable not in palavrasReservadas) :
         coluna = line.find(buildedVariable)
-        variaveis.append(['tkn_variaveis',buildedVariable,linha,coluna+1])
-        lista.append(['tkn_variaveis',buildedVariable,linha,coluna+1])
+        variaveis.append(['tkn_variaveis',buildedVariable,linha,coluna])
+        lista.append(['tkn_variaveis',buildedVariable,linha,coluna])
         return True
     elif buildedVariable != "" and buildedVariable in palavrasReservadasRegras:
         coluna = line.find(buildedVariable)
-        palavrasReservadas.append(['tkn_palavras_reservadas',buildedVariable,linha,coluna+1])
-        lista.append(['tkn_palavras_reservadas',buildedVariable,linha,coluna+1])
+        palavrasReservadas.append(['tkn_palavras_reservadas',buildedVariable,linha,coluna])
+        lista.append(['tkn_palavras_reservadas',buildedVariable,linha,coluna])
         return True
     return False
 
@@ -61,18 +61,15 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
 
     for line in pascalExerciseContent.split('\n'):
         linha += 1
-        coluna = 0
+        coluna = 1
 
         # verifica se a linha é um comentário
         tempLine = line.lstrip()
 
         if(tempLine.startswith('//')):
-            coluna = line.find(word)
-            comentariosArray.append(['tkn_comentarios',tempLine,linha,coluna+1])
-            coluna = line.find(word)
-            lista.append(['tkn_comentarios',tempLine,linha,coluna+1])
-            
-            linha += 1 #talves possa ocorer problemas aqui
+            coluna = coluna+2
+            simbolo = 'tkn_comentario'
+            lista.append([obter_valor_simbolo(simbolo),tempLine,linha,coluna])
             continue
 
         # percorre a linha por palavra
@@ -80,7 +77,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
            
             # if not line.startswith(word) and not word.isspace(): 
             if(word == ' '):
-                coluna == coluna+1
+                coluna = coluna+1
                 continue
             #faz com que ocorra uma espaco entre as palavras da string
             if(modoString):
@@ -89,37 +86,34 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
             
             # verifica se a palavra é uma palavra reservada
             if (word in palavrasReservadasRegras) and not modoString and not dentroComentario:
-                coluna = line.find(word)
-                palavrasReservadas.append(['tkn_palavras_reservadas',word,linha,coluna+1])
-                lista.append([obter_valor_simbolo(word),word,linha,coluna+1])
-                coluna =+ (len(word))
+                lista.append([obter_valor_simbolo(word),word,linha,coluna])
+                coluna += (len(word))
                 continue
             elif (is_float(word)):
-                coluna = line.find(word)
+
                 simbolo = 'tkn_float'
-                lista.append([obter_valor_simbolo(simbolo), word,linha,coluna+1])
-                coluna =+ (len(word))
+                lista.append([obter_valor_simbolo(simbolo), word,linha,coluna])
+                coluna += (len(word))
                 continue
             
             elif (is_integer(word)):
-                coluna = line.find(word)
+
                 simbolo = 'tkn_int'
-                lista.append([obter_valor_simbolo(simbolo), word,linha,coluna+1])
-                coluna =+ (len(word))
+                lista.append([obter_valor_simbolo(simbolo), word,linha,coluna])
+                coluna += (len(word))
                 continue
             
             
             # verifica se a palavra não é uma palavra reservada e é uma variável
             elif (word not in palavrasReservadasRegras) and (word not in tokensLogicosRelacionaisAtriRegras)and (re.fullmatch(variableRegex, word) and not modoString and not dentroComentario):
-                coluna = line.find(word)
+
                 simbolo = 'tkn_variaveis'
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
-                coluna =+ (len(word))
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                coluna += (len(word))
                 continue
 
             # verifica se a palavra é um tokensLogicosRelacionaisAtri
             elif (word in tokensLogicosRelacionaisAtriRegras) and not modoString and not dentroComentario:
-                coluna = line.find(word)
                 if(word == "<>"):
                     simbolo = 'tkn_maiormenor'
                 elif(word == ">"):
@@ -133,14 +127,13 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 elif(word == ":="):
                     simbolo = 'tkn_atribuicao'
                 elif(word == "=="):
-                    simbolo = 'tkn_igualdade'  
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
-                coluna =+ (len(word))
+                    simbolo = 'tkn_igualdade'
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                coluna += (len(word))
                 continue
             
             # verifica se o caractere é um tokensAritimeticos
             elif (word in tokensAritimeticosRegras) and not modoString and not dentroComentario:
-                coluna = line.find(word)
                 if(word == "+"):
                     simbolo = "tkn_adicao"
                 elif(word == "-"):
@@ -149,23 +142,31 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     simbolo = "tkn_multiplicacao"
                 elif(word == "/"):
                     simbolo = "tkn_divisao"
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                coluna += (len(word))
                 continue
             # verifica se o caractere é um tokenSimbolo
             elif(word in tokensSimbolosRegras) and not modoString and not dentroComentario:
                 if(word == ";"):
                     simbolo = "tkn_pontoevirgula"
+
                 elif(word == ","):
                         simbolo = "tkn_virgula"
+
                 elif(word == "."):
                         simbolo = "tkn_ponto"
+
                 elif(word == ":"):
                         simbolo = "tkn_doispontos"
+
                 elif(word == "("):
                         simbolo = "tkn_abreparentese"
+
                 elif(word == ")"):
                         simbolo = "tkn_fechaparentese"
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
+
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                coluna += (len(word))
                 continue
             
             # percorre a palavra por caractere
@@ -177,9 +178,9 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     if caractere == "'":
                         modoString = False
                         coluna += 1
-                        stringsArray.append(['tkn_string',string[:-1],linha,coluna+1])
+                        stringsArray.append(['tkn_string',string[:-1],linha,stringStart])
                         simbolo = 'tkn_string'
-                        lista.append([obter_valor_simbolo(simbolo),string[:-1],linha,coluna+1])
+                        lista.append([obter_valor_simbolo(simbolo),string[:-1],linha,stringStart])
                         string = ""
                     continue  
                
@@ -191,7 +192,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
 
                 # verifica se o caractere é um string
                 elif caractere == "'" and not dentroComentario:
-                    stringStart = line.find(caractere)
+                    stringStart = coluna
                     linhaString = linha
                     modoString = True
                     continue
@@ -209,11 +210,8 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     
                     if caractere == '}':
                         dentroComentario = False
-                        coluna = line.find(word)
-                        comentariosArray.append(['tkn_comentario',textoComentario,linha,coluna+1])  # Adiciona o comentário acumulado ao array
-                        coluna = line.find(word)
                         simbolo = 'tkn_comentario'
-                        lista.append([obter_valor_simbolo(simbolo),textoComentario,linha,coluna+1])  # Adiciona o comentário acumulado ao array
+                        lista.append([obter_valor_simbolo(simbolo),textoComentario,linha,coluna])  # Adiciona o comentário acumulado ao array
                         textoComentario = ""  # Reinicia para o próximo comentário
                     continue
 
