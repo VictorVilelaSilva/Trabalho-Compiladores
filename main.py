@@ -7,7 +7,7 @@ from enum import Enum
 #####################################Analisador Léxico (Pascal)################################
 # percorre o arquivo e retorna os tokens
 
-padrao = r'([a-zA-Z][a-zA-Z0-9_]*|<>|==|:=|>=|<=|<|>|:|[\d.]+|[a-zA-Z0-9]+| |\S)'
+padrao = r'([a-zA-Z][a-zA-Z0-9_]*|<>|=|:=|>=|<=|<|>|:|[\d.]+|[a-zA-Z0-9]+| |\S)'
 
 def variableBuilded(variableRegex, variaveis, buildedVariable,palavrasReservadas,linha,coluna,lista,line):
     if buildedVariable != "" and re.fullmatch(variableRegex, buildedVariable) and (buildedVariable not in palavrasReservadas) :
@@ -126,7 +126,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     simbolo = 'tkn_menorigual'
                 elif(word == ":="):
                     simbolo = 'tkn_atribuicao'
-                elif(word == "=="):
+                elif(word == "="):
                     simbolo = 'tkn_igualdade'
                 lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
                 coluna += (len(word))
@@ -254,7 +254,7 @@ tokensLogicosRelacionaisAtriRegras: List[str]  = [
     '<',
     '<=',
     ':=',
-    '==' 
+    '=' 
 ]
 
 palavrasReservadasRegras: List[str] = [
