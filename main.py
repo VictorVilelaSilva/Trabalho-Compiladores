@@ -7,7 +7,7 @@ from enum import Enum
 #####################################Analisador Léxico (Pascal)################################
 # percorre o arquivo e retorna os tokens
 
-padrao = r'([a-zA-Z][a-zA-Z0-9_]*|<>|==|:=|>=|<=|<|>|:|[\d.]+|[a-zA-Z0-9]+|\S)'
+padrao = r'([a-zA-Z][a-zA-Z0-9_]*|<>|==|:=|>=|<=|<|>|:|[\d.]+|[a-zA-Z0-9]+|\s)'
 
 def variableBuilded(variableRegex, variaveis, buildedVariable,palavrasReservadas,linha,coluna,lista,line):
     if buildedVariable != "" and re.fullmatch(variableRegex, buildedVariable) and (buildedVariable not in palavrasReservadas) :
@@ -79,7 +79,9 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
         for word in re.findall(padrao, line):
            
             # if not line.startswith(word) and not word.isspace(): 
-                
+            if(word == ' '):
+                coluna == coluna+1
+                continue
             #faz com que ocorra uma espaco entre as palavras da string
             if(modoString):
                 string += " "
