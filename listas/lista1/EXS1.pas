@@ -1,4 +1,7 @@
 program exs1;
+
+uses crt;
+
 var n1,n2,n3,n4: real;
 
 begin;
