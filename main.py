@@ -90,20 +90,20 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 coluna = line.find(word)
                 palavrasReservadas.append(['tkn_palavras_reservadas',word,linha,coluna+1])
                 lista.append([obter_valor_simbolo(word),word,linha,coluna+1])
-                coluna =+ (len(word))
+                coluna += (len(word))
                 continue
             elif (is_float(word)):
                 coluna = line.find(word)
                 simbolo = 'tkn_float'
                 lista.append([obter_valor_simbolo(simbolo), word,linha,coluna+1])
-                coluna =+ (len(word))
+                coluna += (len(word))
                 continue
             
             elif (is_integer(word)):
                 coluna = line.find(word)
                 simbolo = 'tkn_int'
                 lista.append([obter_valor_simbolo(simbolo), word,linha,coluna+1])
-                coluna =+ (len(word))
+                coluna += (len(word))
                 continue
             
             
@@ -112,7 +112,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 coluna = line.find(word)
                 simbolo = 'tkn_variaveis'
                 lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
-                coluna =+ (len(word))
+                coluna += (len(word))
                 continue
 
             # verifica se a palavra é um tokensLogicosRelacionaisAtri
@@ -120,20 +120,27 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 coluna = line.find(word)
                 if(word == "<>"):
                     simbolo = 'tkn_maiormenor'
+                    coluna += 1
                 elif(word == ">"):
                     simbolo = 'tkn_maior'
+                    coluna += 1
                 elif(word == ">="):
                     simbolo = 'tkn_maiorigual'
+                    coluna += 1
                 elif(word == "<"):
                     simbolo = 'tkn_menor'
+                    coluna += 1
                 elif(word == "<="):
                     simbolo = 'tkn_menorigual'
+                    coluna += 1
                 elif(word == ":="):
                     simbolo = 'tkn_atribuicao'
+                    coluna += 1
                 elif(word == "=="):
-                    simbolo = 'tkn_igualdade'  
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
-                coluna =+ (len(word))
+                    simbolo = 'tkn_igualdade'
+                    coluna += 1  
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                coluna += (len(word))
                 continue
             
             # verifica se o caractere é um tokensAritimeticos
@@ -153,17 +160,23 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
             elif(word in tokensSimbolosRegras) and not modoString and not dentroComentario:
                 if(word == ";"):
                     simbolo = "tkn_pontoevirgula"
+                    coluna+=1
                 elif(word == ","):
                         simbolo = "tkn_virgula"
+                        coluna+=1
                 elif(word == "."):
                         simbolo = "tkn_ponto"
+                        coluna+=1
                 elif(word == ":"):
                         simbolo = "tkn_doispontos"
+                        coluna+=1
                 elif(word == "("):
                         simbolo = "tkn_abreparentese"
+                        coluna+=1
                 elif(word == ")"):
                         simbolo = "tkn_fechaparentese"
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
+                        coluna+=1
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
                 continue
             
             # percorre a palavra por caractere
