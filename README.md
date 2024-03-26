@@ -13,7 +13,7 @@ Para usar o analisador léxico, execute o script `main.py` passando o caminho do
 
 Exemplo:
 
-python main.py <localAquivo>
+python main.py <\localAquivo>
 
 O script irá processar o arquivo e imprimir a lista de tokens no terminal. Um arquivo `resultado.json` também será gerado no diretório atual com os tokens analisados.
 
