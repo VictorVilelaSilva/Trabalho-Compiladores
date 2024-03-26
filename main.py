@@ -1,7 +1,7 @@
 import json
 import re
 from typing import List
-from functions import variableBuilded, is_integer, is_float, errorCatch, handleTokensAritimeticos, handleTokensSimbolos, handleTokensLogicos, obter_valor_simbolo, errorCatchString
+from functions import  is_integer, is_float, errorCatch, handleTokensAritimeticos, handleTokensSimbolos, handleTokensLogicos, obter_valor_simbolo, errorCatchStringComentario
 from enum import Enum
 import sys
 
@@ -37,6 +37,8 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
     coluna = 0
     linhaString = 0
     stringStart = 0
+    linhaComentario = 0
+    colunaComentario = 0
 
     modoString = False
     dentroComentario = False
@@ -49,7 +51,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
         tempLine = line.lstrip()
 
         if (modoString):
-            errorCatchString(linhaString, stringStart, actualLine)
+            errorCatchStringComentario(linhaString, stringStart, actualLine)
 
         if(tempLine.startswith('//')):
             coluna = coluna+2
@@ -133,9 +135,8 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                
                 # verifica se o caractere é um espaço
                 if (caractere == r'\s'):
-                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
-                        variableBuilder = "" 
-                        continue
+                    variableBuilder = "" 
+                    continue
 
                 # verifica se o caractere é um string
                 elif caractere == "'" and not dentroComentario:
@@ -148,6 +149,9 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 # ativa o modo de comentario
                 elif (caractere == '{') and not modoString and not dentroComentario:
                     dentroComentario = True
+                    linhaComentario = linha
+                    colunaComentario = coluna
+                    lineComentario = line
                     textoComentario = caractere  # Inicia o texto do comentário com '{'
                     
                     continue
@@ -165,7 +169,8 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
 
                 else:
                     errorCatch(linha, line, word) 
-            
+    if(dentroComentario):
+        errorCatchStringComentario(linhaComentario, colunaComentario, lineComentario)        
             
 
     tokensDict = {
@@ -234,6 +239,7 @@ tokensSimbolosRegras: List[str] = [
     '(',
     ')',
 ]
+
   
 def main(arquivo):
     # Abre o arquivo informado como argumento

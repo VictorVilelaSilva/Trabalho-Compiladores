@@ -2,19 +2,6 @@ from classTokens import Tokens
 import re
 from typing import List
 
-def variableBuilded(variableRegex: str, variaveis: list, buildedVariable: str,palavrasReservadas: list,linha: int,coluna: int,lista: list,line: str)->bool:
-    if buildedVariable != "" and re.fullmatch(variableRegex, buildedVariable) and (buildedVariable not in palavrasReservadas) :
-        coluna = line.find(buildedVariable)
-        variaveis.append(['tkn_variaveis',buildedVariable,linha,coluna])
-        lista.append(['tkn_variaveis',buildedVariable,linha,coluna])
-        return True
-    elif buildedVariable != "" and buildedVariable in palavrasReservadas:
-        coluna = line.find(buildedVariable)
-        palavrasReservadas.append(['tkn_palavras_reservadas',buildedVariable,linha,coluna])
-        lista.append(['tkn_palavras_reservadas',buildedVariable,linha,coluna])
-        return True
-    return False
-
 def is_integer(s):
     return s.isdigit()
 
@@ -35,7 +22,7 @@ def errorCatch(linha: int, line: str, word: str) ->None:
     print("Erro: Lexema inválido")
     exit()
 
-def errorCatchString(linha: int, coluna: int,line: str) ->None:
+def errorCatchStringComentario(linha: int, coluna: int,line: str) ->None:
     print(f"Erro na linha {linha} coluna {coluna}")
     print(line)
     #indicar a linha exata da linha
