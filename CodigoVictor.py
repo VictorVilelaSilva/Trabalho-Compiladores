@@ -1,36 +1,14 @@
 import json
 import re
 from typing import List
-
+from functions import variableBuilded, is_integer, is_float, errorCatch, handleTokensAritimeticos, handleTokensSimbolos, handleTokensLogicos, obter_valor_simbolo, errorCatchString
 from enum import Enum
 
 #####################################Analisador Léxico (Pascal)################################
 # percorre o arquivo e retorna os tokens
 
-padrao = r'([a-zA-Z][a-zA-Z0-9_]*|<>|==|:=|>=|<=|<|>|:|[\d.]+|[a-zA-Z0-9]+|\s)'
-
-def variableBuilded(variableRegex, variaveis, buildedVariable,palavrasReservadas,linha,coluna,lista,line):
-    if buildedVariable != "" and re.fullmatch(variableRegex, buildedVariable) and (buildedVariable not in palavrasReservadas) :
-        coluna = line.find(buildedVariable)
-        variaveis.append(['tkn_variaveis',buildedVariable,linha,coluna+1])
-        lista.append(['tkn_variaveis',buildedVariable,linha,coluna+1])
-        return True
-    elif buildedVariable != "" and buildedVariable in palavrasReservadasRegras:
-        coluna = line.find(buildedVariable)
-        palavrasReservadas.append(['tkn_palavras_reservadas',buildedVariable,linha,coluna+1])
-        lista.append(['tkn_palavras_reservadas',buildedVariable,linha,coluna+1])
-        return True
-    return False
-
-def is_integer(s):
-    return s.isdigit()
-
-def is_float(s):
-    try:
-        float_value = float(s)
-        return True
-    except ValueError:
-        return False
+# padrao = r'([a-zA-Z][a-zA-Z0-9_]*|<>|=|:=|>=|<=|<|>|:|[\d.]+|[a-zA-Z0-9]+| |\S)' #Gabriel
+padrao = r'(\d+[a-zA-Z_][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_]*|<>|=|:=|>=|<=|<|>|:|[\d.]+| |\S)' #Victor
 
 def getTokens(pascalExerciseContent: str) -> List[dict]:
 
@@ -56,23 +34,26 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
     
     linha = 0
     coluna = 0
+    linhaString = 0
+    stringStart = 0
+
     modoString = False
     dentroComentario = False
 
     for line in pascalExerciseContent.split('\n'):
         linha += 1
-        coluna = 0
+        coluna = 1
 
         # verifica se a linha é um comentário
         tempLine = line.lstrip()
 
+        if (modoString):
+            errorCatchString(linhaString, stringStart, actualLine)
+
         if(tempLine.startswith('//')):
-            coluna = line.find(word)
-            comentariosArray.append(['tkn_comentarios',tempLine,linha,coluna+1])
-            coluna = line.find(word)
-            lista.append(['tkn_comentarios',tempLine,linha,coluna+1])
-            
-            linha += 1 #talves possa ocorer problemas aqui
+            coluna = coluna+2
+            simbolo = 'tkn_comentario'
+            lista.append([obter_valor_simbolo(simbolo),tempLine,linha,coluna])
             continue
 
         # percorre a linha por palavra
@@ -80,92 +61,58 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
            
             # if not line.startswith(word) and not word.isspace(): 
             if(word == ' '):
-                coluna == coluna+1
+                coluna = coluna+1
                 continue
             #faz com que ocorra uma espaco entre as palavras da string
             if(modoString):
                 string += " "
                 
-            
             # verifica se a palavra é uma palavra reservada
             if (word in palavrasReservadasRegras) and not modoString and not dentroComentario:
-                coluna = line.find(word)
-                palavrasReservadas.append(['tkn_palavras_reservadas',word,linha,coluna+1])
-                lista.append([obter_valor_simbolo(word),word,linha,coluna+1])
-                coluna =+ (len(word))
+                lista.append([obter_valor_simbolo(word),word,linha,coluna])
+                coluna += (len(word))
                 continue
+
             elif (is_float(word)):
-                coluna = line.find(word)
                 simbolo = 'tkn_float'
-                lista.append([obter_valor_simbolo(simbolo), word,linha,coluna+1])
-                coluna =+ (len(word))
+                lista.append([obter_valor_simbolo(simbolo), word,linha,coluna])
+                coluna += (len(word))
                 continue
             
             elif (is_integer(word)):
-                coluna = line.find(word)
                 simbolo = 'tkn_int'
-                lista.append([obter_valor_simbolo(simbolo), word,linha,coluna+1])
-                coluna =+ (len(word))
+                lista.append([obter_valor_simbolo(simbolo), word,linha,coluna])
+                coluna += (len(word))
                 continue
             
             
             # verifica se a palavra não é uma palavra reservada e é uma variável
             elif (word not in palavrasReservadasRegras) and (word not in tokensLogicosRelacionaisAtriRegras)and (re.fullmatch(variableRegex, word) and not modoString and not dentroComentario):
-                coluna = line.find(word)
+
                 simbolo = 'tkn_variaveis'
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
-                coluna =+ (len(word))
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                coluna += (len(word))
                 continue
 
             # verifica se a palavra é um tokensLogicosRelacionaisAtri
             elif (word in tokensLogicosRelacionaisAtriRegras) and not modoString and not dentroComentario:
-                coluna = line.find(word)
-                if(word == "<>"):
-                    simbolo = 'tkn_maiormenor'
-                elif(word == ">"):
-                    simbolo = 'tkn_maior'
-                elif(word == ">="):
-                    simbolo = 'tkn_maiorigual'
-                elif(word == "<"):
-                    simbolo = 'tkn_menor'
-                elif(word == "<="):
-                    simbolo = 'tkn_menorigual'
-                elif(word == ":="):
-                    simbolo = 'tkn_atribuicao'
-                elif(word == "=="):
-                    simbolo = 'tkn_igualdade'  
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
-                coluna =+ (len(word))
+                simbolo = handleTokensLogicos(word)
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                coluna += (len(word))
                 continue
             
             # verifica se o caractere é um tokensAritimeticos
             elif (word in tokensAritimeticosRegras) and not modoString and not dentroComentario:
-                coluna = line.find(word)
-                if(word == "+"):
-                    simbolo = "tkn_adicao"
-                elif(word == "-"):
-                    simbolo = "tkn_subtracao"
-                elif(word == "*"):
-                    simbolo = "tkn_multiplicacao"
-                elif(word == "/"):
-                    simbolo = "tkn_divisao"
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
+                simbolo = handleTokensAritimeticos(word)
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                coluna += (len(word))
                 continue
             # verifica se o caractere é um tokenSimbolo
             elif(word in tokensSimbolosRegras) and not modoString and not dentroComentario:
-                if(word == ";"):
-                    simbolo = "tkn_pontoevirgula"
-                elif(word == ","):
-                        simbolo = "tkn_virgula"
-                elif(word == "."):
-                        simbolo = "tkn_ponto"
-                elif(word == ":"):
-                        simbolo = "tkn_doispontos"
-                elif(word == "("):
-                        simbolo = "tkn_abreparentese"
-                elif(word == ")"):
-                        simbolo = "tkn_fechaparentese"
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna+1])
+                simbolo = handleTokensSimbolos(word)
+
+                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                coluna += (len(word))
                 continue
             
             # percorre a palavra por caractere
@@ -177,9 +124,9 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     if caractere == "'":
                         modoString = False
                         coluna += 1
-                        stringsArray.append(['tkn_string',string[:-1],linha,coluna+1])
+                        stringsArray.append(['tkn_string',string[:-1],linha,stringStart])
                         simbolo = 'tkn_string'
-                        lista.append([obter_valor_simbolo(simbolo),string[:-1],linha,coluna+1])
+                        lista.append([obter_valor_simbolo(simbolo),string[:-1],linha,stringStart])
                         string = ""
                     continue  
                
@@ -191,8 +138,9 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
 
                 # verifica se o caractere é um string
                 elif caractere == "'" and not dentroComentario:
-                    stringStart = line.find(caractere)
+                    stringStart = coluna
                     linhaString = linha
+                    actualLine = line
                     modoString = True
                     continue
                 
@@ -209,22 +157,13 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     
                     if caractere == '}':
                         dentroComentario = False
-                        coluna = line.find(word)
-                        comentariosArray.append(['tkn_comentario',textoComentario,linha,coluna+1])  # Adiciona o comentário acumulado ao array
-                        coluna = line.find(word)
                         simbolo = 'tkn_comentario'
-                        lista.append([obter_valor_simbolo(simbolo),textoComentario,linha,coluna+1])  # Adiciona o comentário acumulado ao array
+                        lista.append([obter_valor_simbolo(simbolo),textoComentario,linha,coluna])  # Adiciona o comentário acumulado ao array
                         textoComentario = ""  # Reinicia para o próximo comentário
                     continue
 
                 else:
-                    indice = line.find(word)
-                    print(f"Erro na linha {linha} coluna {indice}")
-                    print(line)
-                    #indicar a linha exata da linha
-                    print(" "*(indice) + "^")
-                    print("Erro: Lexema inválido")
-                    exit() 
+                    errorCatch(linha, line, word) 
             
             
 
@@ -256,7 +195,7 @@ tokensLogicosRelacionaisAtriRegras: List[str]  = [
     '<',
     '<=',
     ':=',
-    '==' 
+    '=' 
 ]
 
 palavrasReservadasRegras: List[str] = [
@@ -294,64 +233,9 @@ tokensSimbolosRegras: List[str] = [
     '(',
     ')',
 ]
+  
 
-class Tokens(Enum):
-    PROGRAM = 1
-    VAR = 2
-    INTEGER = 3
-    REAL = 4
-    STRING = 5
-    BEGIN = 6
-    BOOLEAN = 7
-    END = 8
-    FOR = 9
-    TO = 10
-    WHILE = 11
-    DO = 12
-    BREAK = 13
-    CONTINUE = 14
-    IF = 15
-    ELSE = 16
-    THEN = 17
-    WRITE = 18
-    READ = 19
-    OR = 20
-    AND = 21
-    NOT = 22
-    MOD = 23
-    DIV = 24
-    TKN_VARIAVEIS = 100
-    TKN_INT = 101
-    TKN_MAIORMENOR = 102
-    TKN_MAIOR = 103
-    TKN_MAIORIGUAL = 104
-    TKN_MENOR = 105
-    TKN_MENORIGUAL = 106
-    TKN_ATRIBUICAO = 107
-    TKN_ADICAO = 108
-    TKN_SUBTRACAO = 109
-    TKN_MULTIPLICACAO = 110
-    TKN_DIVISAO = 111
-    TKN_FLOAT = 112
-    TKN_PONTOEVIRGULA = 113
-    TKN_VIRGULA = 114
-    TKN_PONTO = 115
-    TKN_DOISPONTOS = 116
-    TKN_ABREPARENTESE = 117
-    TKN_FECHAPARENTESE = 118
-    TKN_COMENTARIO = 119
-    TKN_STRING = 120
-    TKN_IGUALDADE = 121
-    
-
-def obter_valor_simbolo(simbolo):
-    try:
-        enum_simbolo = Tokens[simbolo.upper()]
-        return enum_simbolo.value
-    except KeyError:
-        return None
-
-diretorio = r'listas\lista1\EXS3.pas'
+diretorio = r'listas\lista1\EXS1.pas'
 
 pascalExercise = open( diretorio, 'r')
 pascalExerciseContent = pascalExercise.read()
