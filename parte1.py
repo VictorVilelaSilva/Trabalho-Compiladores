@@ -3,7 +3,6 @@ import re
 from typing import List
 from functions import  is_integer, is_float, errorCatch, handleTokensAritimeticos, handleTokensSimbolos, handleTokensLogicos, obter_valor_simbolo, errorCatchStringComentario
 from enum import Enum
-import sys
 
 #####################################Analisador Léxico (Pascal)################################
 # percorre o arquivo e retorna os tokens
@@ -241,7 +240,7 @@ tokensSimbolosRegras: List[str] = [
 ]
 
   
-def main(arquivo):
+def analisadorLexico(arquivo):
     # Abre o arquivo informado como argumento
     try:
         with open(arquivo, 'r') as pascalExercise:
@@ -249,19 +248,14 @@ def main(arquivo):
         
         tokenDict, lista = getTokens(pascalExerciseContent)
 
-        for token in lista:
-            print(token)
-
         resultadoJson = json.dumps(lista)
         with open('resultado.json', 'w') as criarArquivo:
             criarArquivo.write(resultadoJson)
+
+        return lista
+
+
             
     except FileNotFoundError:
         print(f"Erro: O arquivo '{arquivo}' não foi encontrado.")
 
-if __name__ == "__main__":
-
-    if len(sys.argv) > 1:
-        main(sys.argv[1])
-    else:
-        print("Erro: Nenhum arquivo fornecido para análise.")
