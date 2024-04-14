@@ -10,5 +10,5 @@ begin
     
     soma := num1 + num2;
     
-    write(soma);
+    write('A soma de ', num1, ' e ', num2, ' é: ', soma);
 end.
