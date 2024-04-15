@@ -1,371 +1,389 @@
 import sys
 from parte1 import *
+from classTokens import *
+
 
 def main():
     diretorio = r'listas\lista1\teste.pas'
     lista = analisadorLexico(diretorio)
     print(lista)
 
-    if (consome(lista,obter_valor_simbolo('program'))
-        and consome(lista,obter_valor_simbolo('tkn_variaveis'))
-        and consome(lista,obter_valor_simbolo('tkn_pontoevirgula'))
-        and declarations(lista)
-        and consome(lista,obter_valor_simbolo('begin'))
-        and stmtList(lista)
-        and consome(lista,obter_valor_simbolo('end'))
-        and consome(lista,obter_valor_simbolo('tkn_ponto'))):
-        return print('CÓDIGO COMPILADO COM SUCESSO')
-    else:
-        print(lista[0])
-        print('ERRO')
-
+    consome(lista, Tokens.PROGRAM.value)
+    consome(lista, Tokens.TKN_VARIAVEIS.value)
+    consome(lista, Tokens.TKN_PONTOEVIRGULA.value)
+    declarations(lista)
+    consome(lista, Tokens.BEGIN.value)
+    stmtList(lista)
+    consome(lista, Tokens.END.value)
+    consome(lista, Tokens.TKN_PONTO.value)
+    print('CÓDIGO COMPILADO COM SUCESSO')
 
 
 def declarations(lista):
-    if(consome(lista,obter_valor_simbolo('var'))
-        and declaration(lista)
-        and restoDeclaration(lista)):
-        return True
-    else:
-        return False
-            
+    consome(lista, Tokens.VAR.value)
+    declaration(lista)
+    restoDeclaration(lista)
+    
 
 def declaration(lista):
-    if(listaIdent(lista)
-    and consome(lista,obter_valor_simbolo('tkn_doispontos'))
-    and typeFuncao(lista)
-    and consome(lista,obter_valor_simbolo('tkn_pontoevirgula'))):
-        return True
-    else:
-        return False
-        
+    listaIdent(lista)
+    consome(lista, Tokens.TKN_DOISPONTOS.value)
+    typeFuncao(lista)
+    consome(lista, Tokens.TKN_PONTOEVIRGULA.value)
+    
 
 def listaIdent(lista):
-    if(consome(lista,obter_valor_simbolo('tkn_variaveis'))
-        and restoIdentList(lista)):
-        return True
+    consome(lista, Tokens.TKN_VARIAVEIS.value)
+    restoIdentList(lista)
+    
 
 def restoIdentList(lista):
-    if(consome(lista,obter_valor_simbolo('tkn_virgula'))
-        and consome(lista,obter_valor_simbolo('tkn_variaveis'))
-        and restoIdentList(lista)):
-        return True 
+    if(lista[0][0] == Tokens.TKN_VIRGULA.value):
+        consome(lista, Tokens.TKN_VIRGULA.value)
+        consome(lista, Tokens.TKN_VARIAVEIS.value)
+        restoIdentList(lista)
     # OU VAZIO
     else:
-        return True
+        return
+    
 
 def restoDeclaration(lista):
-    if (declaration(lista)
-        and restoDeclaration(lista)):
-        return True
+    if(lista[0][0] == Tokens.TKN_VARIAVEIS.value):
+        declaration(lista)
+        restoDeclaration(lista)
     # OU VAZIO
     else:
-        return True
+        return
 
 def typeFuncao(lista):
-    if(consome(lista,obter_valor_simbolo('integer'))):
-        return True
+    if(lista[0][0] == Tokens.INTEGER.value):
+        (consome(lista, Tokens.INTEGER.value))
     # OU
-    elif(consome(lista,obter_valor_simbolo('real'))):
-        return True
+    elif(lista[0][0] == Tokens.REAL.value):
+        (consome(lista, Tokens.REAL.value))
     # OU
-    elif(consome(lista,obter_valor_simbolo('string'))):
-        return True
-    else:
-        return False
+    elif(lista[0][0] == Tokens.STRING.value):
+        (consome(lista,Tokens.STRING.value))
 
 # ------------------------------------------------
 # INSTRUÇÕES DOS PROGRAMAS
 
 def bloco(lista):
-    if(consome(lista,obter_valor_simbolo('begin'))
-        and stmtList(lista)
-        and consome(lista,obter_valor_simbolo('end'))):
-        return True
-
+    consome(lista, Tokens.BEGIN.value)
+    stmtList(lista)
+    consome(lista, Tokens.END.value)
+    consome(lista, Tokens.TKN_PONTOEVIRGULA.value)
+    
 def stmtList(lista):
-    if(stmt(lista)
-        and stmtList(lista)):
-        return True
+    if(lista[0][0] == Tokens.FOR.value or lista[0][0] == Tokens.READ.value or lista[0][0] == Tokens.WRITE.value or lista[0][0] == Tokens.WHILE.value or lista[0][0] == Tokens.TKN_VARIAVEIS.value or lista[0][0] == Tokens.IF.value or lista[0][0] == Tokens.BEGIN.value or lista[0][0] == Tokens.BREAK.value or lista[0][0] == Tokens.CONTINUE.value or lista[0][0] == Tokens.TKN_PONTOEVIRGULA.value):
+        stmt(lista)
+        stmtList(lista)
     # OU VAZIO
     else:
-        return True
-
+        return
 
 def stmt(lista):
-    if(forStmt(lista)):
-        return True
+    if(lista[0][0] == Tokens.FOR.value):
+        forStmt(lista)
     # OU
-    elif(ioStmt(lista)):
-        return True
+    elif(lista[0][0] == Tokens.READ.value or lista[0][0] == Tokens.WRITE.value):
+        ioStmt(lista)
+
     # OU
-    elif(whileStmt(lista)):
-        return True
+    elif(lista[0][0] == Tokens.WHILE.value):
+        whileStmt(lista)
+
     # OU
-    elif(atrib(lista)
-        and consome(lista,obter_valor_simbolo('tkn_pontoevirgula'))):
-        return True
+    elif(lista[0][0] == Tokens.TKN_VARIAVEIS.value):
+        atrib(lista)
+        consome(lista, Tokens.TKN_PONTOEVIRGULA.value)
+
     # OU
-    elif(ifStmt(lista)):
-        return True
+    elif(lista[0][0] == Tokens.IF.value):
+        ifStmt(lista)
+
     # OU
-    elif(bloco(lista)):
-        return True
+    elif(lista[0][0] == Tokens.BEGIN.value):
+        bloco(lista)
+
     # OU
-    elif(consome(lista,obter_valor_simbolo('break'))
-        and consome(lista,obter_valor_simbolo('tkn_pontoevirgula'))):
-        return True
+    elif(lista[0][0] == Tokens.BREAK.value):
+        consome(lista, Tokens.BREAK.value)
+        consome(lista, Tokens.TKN_PONTOEVIRGULA.value)
+
     # OU
-    elif(consome(lista,obter_valor_simbolo('continue'))
-        and consome(lista,obter_valor_simbolo('tkn_pontoevirgula'))):
-        return True
+    elif(lista[0][0] == Tokens.CONTINUE.value):
+        consome(lista, Tokens.CONTINUE.value)
+        consome(lista, Tokens.TKN_PONTOEVIRGULA.value)
+
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_pontoevirgula'))):
-        return True
+    elif(lista[0][0] == Tokens.TKN_PONTOEVIRGULA.value):
+        consome(lista, Tokens.TKN_PONTOEVIRGULA.value)
+
 
 # ----------------------------------------------------------------------------
 # DESCRIÇÃO AS INSTRUCOES
-    
+
 def forStmt(lista):
-    if(consome(lista,obter_valor_simbolo('for'))
-        and atrib(lista)
-        and consome(lista,obter_valor_simbolo('to'))
-        and endFor(lista)
-        and consome(lista,obter_valor_simbolo('do'))
-        and stmt(lista)):
-        return True
+    consome(lista, Tokens.FOR.value)
+    atrib(lista)
+    consome(lista, Tokens.TO.value)
+    endFor(lista)
+    consome(lista, Tokens.DO.value)
+    stmt(lista) 
 
 def endFor(lista):
-    if(consome(lista,obter_valor_simbolo('tkn_variaveis'))):
-        return True
+    if(lista[0][0] == Tokens.TKN_VARIAVEIS.value):
+        consome(lista, Tokens.TKN_VARIAVEIS.value)
+
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_int'))):
-        return True
+    elif(lista[0][0] == Tokens.TKN_INT.value):
+        consome(lista, Tokens.TKN_INT.value)
 
 def ioStmt(lista):
-    if(consome(lista,obter_valor_simbolo('read'))
-        and consome(lista,obter_valor_simbolo('tkn_abreparentese'))
-        and consome(lista,obter_valor_simbolo('tkn_variaveis'))
-        and consome(lista,obter_valor_simbolo('tkn_fechaparentese'))
-        and consome(lista,obter_valor_simbolo('tkn_ponoevirula'))):
-        return True
+    if(lista[0][0] == Tokens.READ.value):
+        consome(lista, Tokens.READ.value)
+        consome(lista, Tokens.TKN_ABREPARENTESE.value)
+        consome(lista, Tokens.TKN_VARIAVEIS.value)
+        consome(lista, Tokens.TKN_FECHAPARENTESE.value)
+        consome(lista, Tokens.TKN_PONTOEVIRGULA.value)
     # OU
-    elif(consome(lista,obter_valor_simbolo('write'))
-        and consome(lista,obter_valor_simbolo('tkn_abreparentese'))
-        and out(lista)
-        and consome(lista,obter_valor_simbolo('tkn_fechaparentese'))
-        and consome(lista,obter_valor_simbolo('tkn_ponoevirula'))):
-        return True
+    elif(lista[0][0] == Tokens.WRITE.value):
+        consome(lista, Tokens.WRITE.value)
+        consome(lista, Tokens.TKN_ABREPARENTESE.value)
+        out(lista)
+        consome(lista, Tokens.TKN_FECHAPARENTESE.value)
+        consome(lista, Tokens.TKN_PONTOEVIRGULA.value)
 
+def outList(lista):
+    out(lista)
+    restoOutList(lista)
+    
+def restoOutList(lista):
+    if (lista[0][0] == Tokens.TKN_VIRGULA.value):
+        consome(lista, Tokens.TKN_VIRGULA)
+        outList(lista)
+    #OU VAZIO
+    else:
+        return
+    
 def out(lista):
-    if(consome(lista,obter_valor_simbolo('tkn_string'))):
-        return True
+    if(lista[0][0] == Tokens.TKN_STRING.value):
+        consome(lista, Tokens.TKN_STRING.value)
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_variaveis'))):
-        return True
+    elif(lista[0][0] == Tokens.TKN_VARIAVEIS.value):
+        consome(lista, Tokens.TKN_VARIAVEIS.value)
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_int'))):
-        return True
+    elif(lista[0][0] == Tokens.TKN_INT.value):
+        consome(lista, Tokens.TKN_INT.value)
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_float'))):
-        return True
+    elif(lista[0][0] == Tokens.TKN_FLOAT.value):
+        consome(lista, Tokens.TKN_FLOAT.value)
 
 def whileStmt(lista):
-    if(consome(lista,obter_valor_simbolo('while'))
-        and expr(lista)
-        and stmt(lista)):
-        return True
+    consome(lista, Tokens.WHILE.value)
+    expr(lista)
+    consome(lista, Tokens.DO.value)
+    stmt(lista)
 
 def ifStmt(lista):
-    if(consome(lista,obter_valor_simbolo('if'))
-    and expr(lista)
-    and consome(lista,obter_valor_simbolo('then'))
-    and stmt(lista)
-    and elsePart(lista)):
-        return True
+    consome(lista, Tokens.IF.value)
+    expr(lista)
+    consome(lista, Tokens.THEN.value)
+    stmt(lista)
+    elsePart(lista)
+    
 
 def elsePart(lista):
-    if(consome(lista,obter_valor_simbolo('else'))
-        and stmt(lista)):
-        return True
+    if (lista[0][0] == Tokens.ELSE.value):
+        consome(lista, Tokens.ELSE.value)
+        stmt(lista)
     # OU
     # VAZIO
     else:
-        return True
-
+        return
 # ------------------------------------------------------------------------
 # expressoes
-    
+
 def atrib(lista):
-    if (consome(lista,obter_valor_simbolo('tkn_variaveis'))
-        and consome(lista,obter_valor_simbolo('tkn_atribuicao'))
-        and expr(lista)):
-        return True
+    consome(lista, Tokens.TKN_VARIAVEIS.value)
+    consome(lista, Tokens.TKN_ATRIBUICAO.value)
+    expr(lista)
 
 def expr(lista):
-    if(orFuncao(lista)):
-        return True
+    orFuncao(lista)
 
 def orFuncao(lista):
-    if (andFuncao(lista)
-        and restoOr(lista)):
-        return True
+    andFuncao(lista)
+    restoOr(lista)
 
 def restoOr(lista):
-    if(consome(lista,obter_valor_simbolo('or'))
-        and andFuncao(lista)
-        and restoOr(lista)):
-        return True
+    if (lista[0][0] == Tokens.OR.value):
+        consome(lista, Tokens.OR.value)
+        andFuncao(lista)
+        restoOr(lista)
     # OU
     # VAZIO
     else:
-        return True
+        return
 
 def andFuncao(lista):
-    if(notFuncao(lista)
-        and restoAnd(lista)):
-        return True
-    
+    notFuncao(lista)
+    restoAnd(lista)
+
 def restoAnd(lista):
-    if(consome(lista,obter_valor_simbolo('and'))
-        and notFuncao(lista)
-        and restoAnd(lista)):
-        return True
+    if (lista[0][0] == Tokens.AND.value):
+        consome(lista, Tokens.AND.value)
+        notFuncao(lista)
+        restoAnd(lista)
     # OU
     # VAZIO
     else:
-        return True
-    
+        return
+
+
 def notFuncao(lista):
-    if(consome(lista,obter_valor_simbolo('not'))
-        and notFuncao(lista)):
-        return True
+    if(lista[0][0] == Tokens.NOT.value):
+        consome(lista, Tokens.NOT.value)
+        notFuncao(lista)
     # OU
-    elif(rel(lista)):
-        return True
-    
+    else:
+        rel(lista)
+
 def rel(lista):
-    if(addFuncao(lista)
-        and restoRel(lista)):
-        return True
-    
+    addFuncao(lista)
+    restoRel(lista)
+
 def restoRel(lista):
-    if(consome(lista,obter_valor_simbolo('tkn_igualdade'))
-        and addFuncao(lista)):
-        return True
+    if (lista[0][0] == Tokens.TKN_IGUALDADE.value):
+        consome(lista, Tokens.TKN_IGUALDADE.value)
+        addFuncao(lista)
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_maiormenor'))
-        and addFuncao(lista)):
-        return True
+    elif(lista[0][0] == Tokens.TKN_MAIORMENOR.value):
+        consome(lista, Tokens.TKN_MAIORMENOR.value)
+        addFuncao(lista)
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_menor'))
-        and addFuncao(lista)):
-        return True
+    elif(lista[0][0] == Tokens.TKN_MENOR.value):
+        consome(lista, Tokens.TKN_MENOR.value)
+        addFuncao(lista)
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_menorigual'))
-        and addFuncao(lista)):
-        return True
+    elif(lista[0][0] == Tokens.TKN_MENORIGUAL.value):
+        consome(lista, Tokens.TKN_MENORIGUAL.value)
+        addFuncao(lista)
+
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_maior'))
-        and addFuncao(lista)):
-        return True
+    elif(lista[0][0] == Tokens.TKN_MAIOR.value):
+        consome(lista, Tokens.TKN_MAIOR.value)
+        addFuncao(lista)
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_maiorigual'))
-        and addFuncao(lista)):
-        return True
+    elif(lista[0][0] == Tokens.TKN_MAIORIGUAL.value):
+        consome(lista, Tokens.TKN_MAIORIGUAL.value)
+        addFuncao(lista)
     # OU
     # VAZIO
     else:
-        return True
-    
+        return
+
+
 def addFuncao(lista):
-    if(mult(lista)
-        and restoAdd(lista)):
-        return True
-    
+    mult(lista)
+    restoAdd(lista)
+
 def restoAdd(lista):
-    if(consome(lista,obter_valor_simbolo('tkn_adicao'))
-        and mult(lista)
-        and restoAdd(lista)):
-        return True
+    if(lista[0][0] == Tokens.TKN_ADICAO.value):
+        consome(lista, Tokens.TKN_ADICAO.value)
+        mult(lista)
+        restoAdd(lista)
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_subtracao'))
-        and mult(lista)
-        and restoAdd(lista)):
-        return True
+    elif(lista[0][0] == Tokens.TKN_SUBTRACAO.value):
+        consome(lista, Tokens.TKN_SUBTRACAO.value)
+        mult(lista)
+        restoAdd(lista)
+
     # OU
     # VAZIO
     else:
-        return True
-    
+        return
+
+
 def mult(lista):
-    if(uno(lista)
-        and restoMult(lista)):
-        return True
-    
+    uno(lista)
+    restoMult(lista)
+
 def restoMult(lista):
-    if(consome(lista,obter_valor_simbolo('tkn_multiplicacao'))
-        and uno(lista)
-        and restoMult(lista)):
-        return True
+    if(lista[0][0] == Tokens.TKN_MULTIPLICACAO.value):
+        consome(lista, Tokens.TKN_MULTIPLICACAO.value)
+        uno(lista)
+        restoMult(lista)
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_divisao'))
-        and uno(lista)
-        and restoMult(lista)):
-        return True
+    elif(lista[0][0] == Tokens.TKN_DIVISAO.value):
+        consome(lista, Tokens.TKN_DIVISAO.value)
+        uno(lista)
+        restoMult(lista)
     # OU
-    elif(consome(lista,obter_valor_simbolo('mod'))
-        and uno(lista)
-        and restoMult(lista)):
-        return True
+    elif(lista[0][0] == Tokens.MOD.value):
+        consome(lista, Tokens.MOD.value)
+        uno(lista)
+        restoMult(lista)
     # OU
-    elif(consome(lista,obter_valor_simbolo('div'))
-        and uno(lista)
-        and restoMult(lista)):
-        return True
+    elif(lista[0][0] == Tokens.DIV.value):
+        consome(lista, Tokens.DIV.value)
+        uno(lista)
+        restoMult(lista)
     # OU
     # VAZIO
     else:
-        return True
-    
+        return
+
+
 def uno(lista):
-    if(consome(lista,obter_valor_simbolo('tkn_adicao'))
-        and uno(lista)):
-        return True
+    if(lista[0][0] == Tokens.TKN_ADICAO.value):
+        consome(lista, Tokens.TKN_ADICAO.value)
+        uno(lista)
     # OU
-    elif(consome(lista,obter_valor_simbolo('tkn_subtracao'))
-        and uno(lista)):
-        return True
+    elif(lista[0][0] == Tokens.TKN_SUBTRACAO.value):
+        consome(lista, Tokens.TKN_SUBTRACAO.value)
+        uno(lista)
     # OU
-    elif(fator(lista)):
-        return True
+    else:
+        fator(lista)
+
 
 def fator(lista):
-    if consome(lista,obter_valor_simbolo('tkn_int')):
-        return True
-    elif consome(lista,obter_valor_simbolo('tkn_float')):
-        return
-    elif consome(lista,obter_valor_simbolo('tkn_variaveis')):
-        return True
-    elif consome(lista,obter_valor_simbolo('tkn_abreparentese')):
+    if (lista[0][0] == Tokens.TKN_INT.value):
+        consome(lista, Tokens.TKN_INT.value)
+        
+    elif (lista[0][0] == Tokens.TKN_FLOAT.value):
+        consome(lista, Tokens.TKN_FLOAT.value)
+
+    elif (lista[0][0] == Tokens.TKN_VARIAVEIS.value):
+        consome(lista, Tokens.TKN_VARIAVEIS.value)
+        
+    elif (lista[0][0] == Tokens.TKN_ABREPARENTESE.value):
+        consome(lista, Tokens.TKN_ABREPARENTESE.value)
         expr(lista)
-        return True
-    elif consome(lista,obter_valor_simbolo('tkn_fechaparentese')):
-        return True
-    elif consome(lista,obter_valor_simbolo('tkn_string')):
-        return True
-    else:
-        print('ERRO')
+        
+    elif (lista[0][0] == Tokens.TKN_FECHAPARENTESE.value):
+        consome(lista, Tokens.TKN_FECHAPARENTESE.value)
+        
+    elif (lista[0][0] == Tokens.TKN_STRING.value):
+        consome(lista, Tokens.TKN_STRING.value)
+        
+
+
 
 
 # CADA CONSOME DA UM POP NA LISTA
 def consome(lista,token_consumido):
     if lista[0][0] == token_consumido:
             lista.pop(0)
-            return True
-    else:
-        return False
+            return
+    else:      
+        print('ERRO, ESPERAVA TOKEN ' + encontrar_nome_por_valor(token_consumido) + ' TEMOS TOKEN ' + encontrar_nome_por_valor(lista[0][0]))
+        exit()
 
-
-
+def encontrar_nome_por_valor(valor):
+    for token in Tokens:
+        if token.value == valor:
+            return token.name
 main()
