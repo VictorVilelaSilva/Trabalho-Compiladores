@@ -22,6 +22,14 @@ def errorCatch(linha: int, line: str, word: str) ->None:
     print("Erro: Lexema inválido")
     exit()
 
+def errorCatchString(linha: int, coluna: int,line: str) ->None:
+    print(f"Erro na linha {linha} coluna {coluna}")
+    print(line)
+    #indicar a linha exata da linha
+    print(" "*(coluna-1) + "^")
+    print("Erro: String não fechada")
+    exit()
+
 def errorCatchStringComentario(linha: int, coluna: int,line: str) ->None:
     print(f"Erro na linha {linha} coluna {coluna}")
     print(line)
@@ -29,6 +37,15 @@ def errorCatchStringComentario(linha: int, coluna: int,line: str) ->None:
     print(" "*(coluna-1) + "^")
     print("Erro: String não fechada")
     exit()
+
+def errorCatchComentario(linha: int, coluna: int,line: str) ->None:
+    print(f"Erro na linha {linha} coluna {coluna}")
+    print(line)
+    #indicar a linha exata da linha
+    print(" "*(coluna-1) + "^")
+    print("Erro: Comentario não fechado não fechada")
+    exit()
+
 
 
 def handleTokensAritimeticos(word: str)->str:

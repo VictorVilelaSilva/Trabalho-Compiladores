@@ -1,0 +1,91 @@
+A pontuação de cada criterio adotados para avaliação foram os seguintes:
+        "retorno-tokens" : 12,
+        "tratamento-erros" : 4,
+        "otimizacao-codigo-estrutra" : 2,
+        "dominio-codigo-problema" : 2,
+Vocês obtiveram as seguintes porcentagens em cada um dos quesitos:
+        "retorno-tokens" : 0.7,
+        "tratamento-erros" : 1,
+        "otimizacao-codigo-estrutra" : 0.4,
+        "dominio-codigo-problema" : 0.8,
+
+Observações:
+
+
+- Mudar os tokens, utilizar tuplas ao inves de utilizar listas ja que os tokens gerados nao serao mutaveis
+
+- As funções obter_valor_simbolo são facilmente substituiveis por um dicionario
+
+---------------------------------------Arrumado --------------------------------------------------------------------------------------------------------
+- Não guardar comentarios na lista de saída pois pode dar problema na analise lexica
+
+- As funções  handleTokensAritimeticos, handleTokensSimbolos e handleTokensLogicos são facilmente substituiveis por um dicionario
+
+- As strings que são salvas tem espaços que não foram colocados anteriomente:
+        'asd'
+        [
+                120,
+                " asd ",
+                3,
+                1
+        ],
+
+- Se eu quiser digitar um \n na string o analisador léxico vai pegar e concatenar esses dois caracteres como um \n ao invez de '\\' e 'n'?
+        [
+                120,
+                " Digite o n1 . \\ n ",
+                8,
+                11
+        ],
+
+
+
+O erro de comentario que nao foi fechado aparece o seguinte:
+        Erro na linha 4 coluna 5
+                {
+                ^
+        Erro: String não fechada
+
+
+- Variaveis sem uso 'variableBuilder' e 'numero'
+
+- a string '..' deveria ser aceita, os pontos deveriam ser classificados individualmente como pontos finais, todavia temos o seguinte resultado.
+        Erro na linha 3 coluna 0
+        ..
+        ^
+        Erro: Lexema inválido
+
+- A linha "program  exemplo ; //a", está classificando como dois caracteres de divisão ao invés de considerar que é comentario
+        [
+                111,
+                "/",
+                2,
+                20
+        ],
+        [
+                111,
+                "/",
+                2,
+                21
+        ],
+        [
+                100,
+                "a",
+                2,
+                22
+        ],
+
+
+- Não é possível ao começar a ler uma string ou um comentario lê-lo até o fim para evitar esse tipo de comparações repetidamente? "and not modoString and not dentroComentario"
+        * Caso não seja possível, é possível ao menos unificar todos esses and's em diversos lugares repetidos em uma unica condicional e aninhar as demais um tab pra frente
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+- Ao classificar um token do tipo float deve-se adicionar o caractere '0' no final do lexema
+
+
+- As listas tokensAritimeticosRegras, tokensLogicosRelacionaisAtriRegras, palavrasReservadasRegras, tokensSimbolosRegras podem ser conjuntos afim de otimizar o código em comandos como "word in tokensSimbolosRegras":
+        * Passará a ser O(1) ao invés de O(N) - https://stackoverflow.com/questions/13884177/complexity-of-in-operator-in-python
+
+- Escrita em arquivo é pesada, retornar so os tokens para a proxima etapa //EH SO PRA TESTE BOY, OXI
+
+- Não le o arquivo via terminal //FAKE NEWS

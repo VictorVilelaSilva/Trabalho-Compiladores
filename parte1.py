@@ -1,21 +1,44 @@
 import json
 import re
 from typing import List
-from functions import  is_integer, is_float, errorCatch, handleTokensAritimeticos, handleTokensSimbolos, handleTokensLogicos, obter_valor_simbolo, errorCatchStringComentario
+from functions import *
 from enum import Enum
 
 #####################################Analisador Léxico (Pascal)################################
 # percorre o arquivo e retorna os tokens
 
-# padrao = r'([a-zA-Z][a-zA-Z0-9_]*|<>|=|:=|>=|<=|<|>|:|[\d.]+|[a-zA-Z0-9]+| |\S)' #Gabriel
-padrao = r'(\d+[a-zA-Z_][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_]*|<>|=|:=|>=|<=|<|>|:|[\d.]+| |\S)' #Victor
+padrao = r"(\d+[a-zA-Z_][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_]*|<>|=|:=|>=|<=|<|>|:|[\d.]+|'[^']*'| |\S)"
 
 def getTokens(pascalExerciseContent: str) -> List[dict]:
 
     intRegex = r'^[0-9]+$'
     floatRegex = r'[0-9]+\.[0-9]+'
     variableRegex = r'[a-zA-Z][a-zA-Z0-9_]*'
-    # variableRegex = r'^[a-zA-Z][a-zA-Z0-9]*$'
+    TokensAritimeticos = {
+        "+": "tkn_adicao",
+        "-": "tkn_subtracao",
+        "*": "tkn_multiplicacao",
+        "/": "tkn_divisao"
+    }
+
+    TokensSimbolos = {
+        ";": "tkn_pontoevirgula",
+        ",": "tkn_virgula",
+        ".": "tkn_ponto",
+        ":": "tkn_doispontos",
+        "(": "tkn_abreparentese",
+        ")": "tkn_fechaparentese"
+    }
+
+    TokensLogicos = {
+        "<>": "tkn_maiormenor",
+        ">": "tkn_maior",
+        ">=": "tkn_maiorigual",
+        "<": "tkn_menor",
+        "<=": "tkn_menorigual",
+        ":=": "tkn_atribuicao",
+        "=": "tkn_igualdade"
+    }
 
     lista = []
     tokensAritimeticos = []
@@ -28,8 +51,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
     comentariosArray = []
     floatsArray = []
     string = ""
-    variableBuilder = ""
-    numero = ""
+    comentario2 = ""
     
     
     linha = 0
@@ -50,32 +72,80 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
         tempLine = line.lstrip()
 
         if (modoString):
-            errorCatchStringComentario(linhaString, stringStart, actualLine)
+            errorCatchString(linhaString, stringStart, actualLine)
 
         if(tempLine.startswith('//')):
             coluna = coluna+2
-            
+            simbolo = 'tkn_comentario'
+            lista.append([obter_valor_simbolo(simbolo),tempLine,linha,coluna])
             continue
+
 
         # percorre a linha por palavra
         for word in re.findall(padrao, line):
            
-            # if not line.startswith(word) and not word.isspace(): 
             if(word == ' '):
                 coluna = coluna+1
+                if(modoString):
+                    string += " "
+                elif(dentroComentario):
+                    comentario2 += " "
                 continue
-            #faz com que ocorra uma espaco entre as palavras da string
-            if(modoString):
-                string += " "
+            
+            if(word == '/' and line[coluna-1] == '/'):
+                #percorre até o final da linha para pegar o comentario
+                comentario = line[coluna-1:]
+                break
+
+            if(word.startswith("{") or dentroComentario):
+                dentroComentario = True
+                lineComentario = line
+                if(line.endswith("}")):
+                    dentroComentario = False
+                    comentario2 = line[coluna-1:]
+                    break
+                elif(word.endswith("}")):
+                    dentroComentario = False
+                    comentario2 += word
+                    break
+                comentario2 += word
+                continue
+                
+                
+            if(word.startswith("'")):
+                if(word.endswith("'")):
+                    stringsArray.append(['tkn_string',word,linha,coluna])
+                    lista.append([obter_valor_simbolo('tkn_string'),word,linha,coluna])
+                    coluna += (len(word))
+                    continue
+                else:
+                    stringStart = coluna
+                    linhaString = linha
+                    actualLine = line
+                    string += word[1:]
+                    modoString = True
+                    continue
+            
+
+            elif(modoString):
+                string += " " + word
+                if(word.endswith("'")):
+                    stringsArray.append(['tkn_string',string,linhaString,stringStart])
+                    lista.append([obter_valor_simbolo('tkn_string'),string,linhaString,stringStart])
+                    coluna += (len(word))
+                    string = ""
+                    modoString = False
+                continue
                 
             # verifica se a palavra é uma palavra reservada
-            if (word in palavrasReservadasRegras) and not modoString and not dentroComentario:
+            if (word in palavrasReservadasRegras) and not dentroComentario:
                 lista.append([obter_valor_simbolo(word),word,linha,coluna])
                 coluna += (len(word))
                 continue
 
             elif (is_float(word)):
                 simbolo = 'tkn_float'
+                word += '0'  # adicionar float
                 lista.append([obter_valor_simbolo(simbolo), word,linha,coluna])
                 coluna += (len(word))
                 continue
@@ -88,7 +158,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
             
             
             # verifica se a palavra não é uma palavra reservada e é uma variável
-            elif (word not in palavrasReservadasRegras) and (word not in tokensLogicosRelacionaisAtriRegras)and (re.fullmatch(variableRegex, word) and not modoString and not dentroComentario):
+            elif (word not in palavrasReservadasRegras) and (word not in tokensLogicosRelacionaisAtriRegras)and (re.fullmatch(variableRegex, word) and not dentroComentario):
 
                 simbolo = 'tkn_variaveis'
                 lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
@@ -96,55 +166,34 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 continue
 
             # verifica se a palavra é um tokensLogicosRelacionaisAtri
-            elif (word in tokensLogicosRelacionaisAtriRegras) and not modoString and not dentroComentario:
-                simbolo = handleTokensLogicos(word)
+            elif (word in tokensLogicosRelacionaisAtriRegras) and not dentroComentario:
+                simbolo = TokensLogicos[word]
                 lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
                 coluna += (len(word))
                 continue
             
             # verifica se o caractere é um tokensAritimeticos
-            elif (word in tokensAritimeticosRegras) and not modoString and not dentroComentario:
-                simbolo = handleTokensAritimeticos(word)
+            elif (word in tokensAritimeticosRegras) and not dentroComentario:
+                simbolo = TokensAritimeticos[word]
                 lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
                 coluna += (len(word))
                 continue
             # verifica se o caractere é um tokenSimbolo
-            elif(word in tokensSimbolosRegras) and not modoString and not dentroComentario:
-                simbolo = handleTokensSimbolos(word)
-
+            elif(word in tokensSimbolosRegras) and not dentroComentario:
+                simbolo = TokensSimbolos[word]
                 lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
                 coluna += (len(word))
                 continue
             
             # percorre a palavra por caractere
             for caractere in word:
-                coluna += 1
-                # verifica se esta no modo string
-                if modoString:
-                    string+=caractere
-                    if caractere == "'":
-                        modoString = False
-                        stringsArray.append(['tkn_string',string[:-1],linha,stringStart])
-                        simbolo = 'tkn_string'
-                        lista.append([obter_valor_simbolo(simbolo),string[:-1],linha,stringStart])
-                        string = ""
-                    continue  
-               
+            
                 # verifica se o caractere é um espaço
                 if (caractere == r'\s'):
-                    variableBuilder = "" 
                     continue
 
-                # verifica se o caractere é um string
-                elif caractere == "'" and not dentroComentario:
-                    stringStart = coluna
-                    linhaString = linha
-                    actualLine = line
-                    modoString = True
-                    continue
-                
                 # ativa o modo de comentario
-                elif (caractere == '{') and not modoString and not dentroComentario:
+                elif (caractere == '{') and not dentroComentario:
                     dentroComentario = True
                     linhaComentario = linha
                     colunaComentario = coluna
@@ -159,14 +208,15 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     
                     if caractere == '}':
                         dentroComentario = False
-                        # Adiciona o comentário acumulado ao array
+                        simbolo = 'tkn_comentario'
+                        lista.append([obter_valor_simbolo(simbolo),textoComentario,linha,coluna])  # Adiciona o comentário acumulado ao array
                         textoComentario = ""  # Reinicia para o próximo comentário
                     continue
 
                 else:
                     errorCatch(linha, line, word) 
     if(dentroComentario):
-        errorCatchStringComentario(linhaComentario, colunaComentario, lineComentario)        
+        errorCatchComentario(linhaComentario, colunaComentario, lineComentario)        
             
 
     tokensDict = {
@@ -181,6 +231,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
         'comentarios' : comentariosArray
     }
     return tokensDict, lista
+
 
 
 tokensAritimeticosRegras: List[str] = [

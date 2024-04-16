@@ -1,7 +1,7 @@
 import json
 import re
 from typing import List
-from functions import variableBuilded, is_integer, is_float, errorCatch, handleTokensAritimeticos, handleTokensSimbolos, handleTokensLogicos, obter_valor_simbolo, errorCatchString
+from functions import  is_integer, is_float, errorCatch, handleTokensAritimeticos, handleTokensSimbolos, handleTokensLogicos, obter_valor_simbolo, errorCatchStringComentario
 from enum import Enum
 
 #####################################Analisador Léxico (Pascal)################################
@@ -28,14 +28,14 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
     comentariosArray = []
     floatsArray = []
     string = ""
-    variableBuilder = ""
-    numero = ""
     
     
     linha = 0
     coluna = 0
     linhaString = 0
     stringStart = 0
+    linhaComentario = 0
+    colunaComentario = 0
 
     modoString = False
     dentroComentario = False
@@ -48,12 +48,11 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
         tempLine = line.lstrip()
 
         if (modoString):
-            errorCatchString(linhaString, stringStart, actualLine)
+            errorCatchStringComentario(linhaString, stringStart, actualLine)
 
         if(tempLine.startswith('//')):
             coluna = coluna+2
-            simbolo = 'tkn_comentario'
-            lista.append([obter_valor_simbolo(simbolo),tempLine,linha,coluna])
+            
             continue
 
         # percorre a linha por palavra
@@ -117,13 +116,12 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
             
             # percorre a palavra por caractere
             for caractere in word:
-            
+                coluna += 1
                 # verifica se esta no modo string
                 if modoString:
                     string+=caractere
                     if caractere == "'":
                         modoString = False
-                        coluna += 1
                         stringsArray.append(['tkn_string',string[:-1],linha,stringStart])
                         simbolo = 'tkn_string'
                         lista.append([obter_valor_simbolo(simbolo),string[:-1],linha,stringStart])
@@ -132,9 +130,8 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                
                 # verifica se o caractere é um espaço
                 if (caractere == r'\s'):
-                    if variableBuilded(variableRegex, variaveis, variableBuilder, palavrasReservadas,linha,coluna,lista,line):
-                        variableBuilder = "" 
-                        continue
+                    variableBuilder = "" 
+                    continue
 
                 # verifica se o caractere é um string
                 elif caractere == "'" and not dentroComentario:
@@ -147,6 +144,9 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 # ativa o modo de comentario
                 elif (caractere == '{') and not modoString and not dentroComentario:
                     dentroComentario = True
+                    linhaComentario = linha
+                    colunaComentario = coluna
+                    lineComentario = line
                     textoComentario = caractere  # Inicia o texto do comentário com '{'
                     
                     continue
@@ -157,14 +157,14 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     
                     if caractere == '}':
                         dentroComentario = False
-                        simbolo = 'tkn_comentario'
-                        lista.append([obter_valor_simbolo(simbolo),textoComentario,linha,coluna])  # Adiciona o comentário acumulado ao array
+                        # Adiciona o comentário acumulado ao array
                         textoComentario = ""  # Reinicia para o próximo comentário
                     continue
 
                 else:
                     errorCatch(linha, line, word) 
-            
+    if(dentroComentario):
+        errorCatchStringComentario(linhaComentario, colunaComentario, lineComentario)        
             
 
     tokensDict = {
@@ -233,16 +233,24 @@ tokensSimbolosRegras: List[str] = [
     '(',
     ')',
 ]
+
   
+def analisadorLexico(arquivo):
+    # Abre o arquivo informado como argumento
+    try:
+        with open(arquivo, 'r') as pascalExercise:
+            pascalExerciseContent = pascalExercise.read()
+        
+        tokenDict, lista = getTokens(pascalExerciseContent)
 
-diretorio = r'listas\lista1\EXS1.pas'
+        resultadoJson = json.dumps(lista)
+        with open('resultado.json', 'w') as criarArquivo:
+            criarArquivo.write(resultadoJson)
 
-pascalExercise = open( diretorio, 'r')
-pascalExerciseContent = pascalExercise.read()
+        return lista
 
-tokenDict,lista = getTokens(pascalExerciseContent)
 
-resultadoJsom = json.dumps(lista)
-criarArquivo = open('resultado.json', 'w')
-criarArquivo.write(resultadoJsom)
-#passar resultado para JSON
+            
+    except FileNotFoundError:
+        print(f"Erro: O arquivo '{arquivo}' não foi encontrado.")
+
