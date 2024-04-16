@@ -77,7 +77,6 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
         if(tempLine.startswith('//')):
             coluna = coluna+2
             simbolo = 'tkn_comentario'
-            lista.append([obter_valor_simbolo(simbolo),tempLine,linha,coluna])
             continue
 
 
@@ -187,7 +186,8 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
             
             # percorre a palavra por caractere
             for caractere in word:
-            
+                # coluna += 1
+
                 # verifica se o caractere é um espaço
                 if (caractere == r'\s'):
                     continue
@@ -209,7 +209,6 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     if caractere == '}':
                         dentroComentario = False
                         simbolo = 'tkn_comentario'
-                        lista.append([obter_valor_simbolo(simbolo),textoComentario,linha,coluna])  # Adiciona o comentário acumulado ao array
                         textoComentario = ""  # Reinicia para o próximo comentário
                     continue
 

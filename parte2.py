@@ -2,11 +2,11 @@ import sys
 from parte1 import *
 from classTokens import *
 
-diretorio = r'listas\lista1\EXS1.pas'
+diretorio = r'listas\lista1\teste.pas'
 lista = analisadorLexico(diretorio)
 
 def main():
-
+    print(lista)
     consome(Tokens.PROGRAM.value)
     consome(Tokens.TKN_VARIAVEIS.value)
     consome(Tokens.TKN_PONTOEVIRGULA.value)
