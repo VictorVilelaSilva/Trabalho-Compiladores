@@ -2,7 +2,7 @@ import sys
 from parte1 import *
 from classTokens import *
 
-diretorio = r'listas\lista1\teste.pas'
+diretorio = r'listas\lista1\EXS1.pas'
 lista = analisadorLexico(diretorio)
 
 def main():
@@ -386,10 +386,8 @@ def fator():
     elif Tokens.TKN_ABREPARENTESE.value == lista[0][0]:
         consome(Tokens.TKN_ABREPARENTESE.value)
         expr()
-        
-    elif Tokens.TKN_FECHAPARENTESE.value == lista[0][0]:
         consome(Tokens.TKN_FECHAPARENTESE.value)
-        
+            
     elif Tokens.TKN_STRING.value == lista[0][0]:
         consome(Tokens.TKN_STRING.value)
         

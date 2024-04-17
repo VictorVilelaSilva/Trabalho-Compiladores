@@ -3,9 +3,7 @@ program exs1 ;
 
 var n1,n4: real;
 
-begin;
-
- 
+begin
  write ('caro usuario este programa calculara 3 notas com seus respesquitivos pesos e a media da nota sera o conceito recebido.');
  write ('para comecar aperte enter ');
  
@@ -31,27 +29,27 @@ begin;
   //de executar e ja mostrar a mensagem direto pro usuario de seu conceito.
  if ((n4<=10) and (n4>=8))
  then  begin
-       write ('caro usuario sua media e ', n4:4:2, ' e seu conceito e A');
-       end
+       write ('caro usuario sua media e ', n4, ' e seu conceito e A');
+       end;
 
        else  if  (n4<8) and (n4>=7)
                then  begin
-                   write ('caro usuario sua media e ', n4:4:2, ' e seu conceito e B');
-                   end
+                   write ('caro usuario sua media e ', n4, ' e seu conceito e B');
+                   end;
 
                    else if (n4<7) and (n4>=6)
                           then  begin
-                                write ('caro usuario sua media e ', n4:4:2, ' e seu conceito e C');
-                                end
+                                write ('caro usuario sua media e ', n4, ' e seu conceito e C');
+                                end;
 
                                 else if (n4<6) and (n4>=5)
                                        then  begin
-                                             write ('caro usuario sua media e ' , n4:4:2, ' e seu conceito e D');
-                                             end
+                                             write ('caro usuario sua media e ' , n4, ' e seu conceito e D');
+                                             end;
 
                                              else if (n4<5) and (n4>=0)
                                                     then  begin
-                                                          write ('caro usuario sua media e ', n4:4:2, ' e seu conceito e E');
+                                                          write ('caro usuario sua media e ', n4, ' e seu conceito e E');
                                                           end;
 
  write (' ');
