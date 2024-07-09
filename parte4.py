@@ -76,7 +76,7 @@ def interpretar_codigo(codigo, variaveis, labels):
       variaveis[guardar] = resultado
 
     elif operacao == "=":
-      guardar, op1, _, _ = instrucao
+      _, guardar, op1, _ = instrucao
       variaveis[guardar] = resolver_operando(op1, variaveis)
 
     elif operacao == "if":
@@ -95,7 +95,10 @@ def interpretar_codigo(codigo, variaveis, labels):
     elif operacao == "call":
       _, funcao, argumento, _ = instrucao
       if funcao == "print":
-        print(argumento)
+        if(argumento in variaveis):
+          print(variaveis[argumento])
+        else:
+          print(argumento)
       elif funcao == "scan":
         variaveis[argumento] = input()
 
@@ -105,7 +108,7 @@ def main():
     """Função principal do interpretador."""
 
     # nome_arquivo = input("Digite o nome do arquivo .py: ")
-    nome_arquivo = "cod_teste.py"
+    nome_arquivo = "cod_Victor_Gabriel.py"
 
     try:
         spec = importlib.util.spec_from_file_location("modulo_personalizado", nome_arquivo)
@@ -120,10 +123,10 @@ def main():
     variaveis = {}
     labels = [(i, tupla[1]) for i, tupla in enumerate(codigo) if tupla[0] == "label"]
 
-    # try:
-    interpretar_codigo(codigo, variaveis, labels)
-    # except (ValueError, ZeroDivisionError) as e:
-    #     print(f"Erro durante a execução: {e}")
+    try:
+      interpretar_codigo(codigo, variaveis, labels)
+    except (ValueError, ZeroDivisionError) as e:
+      print(f"Erro durante a execução: {e}")
         
 if __name__ == "__main__":
   main()
