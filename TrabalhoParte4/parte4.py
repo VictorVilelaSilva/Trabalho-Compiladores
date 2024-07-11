@@ -2,7 +2,6 @@ import sys
 import importlib.util
 
 def executar_operacao(operacao, op1, op2, variaveis):
-  """Executa uma operação aritmética, lógica ou relacional."""
 
   if operacao == "+":
     return float(op1) + float(op2)
@@ -42,7 +41,6 @@ def executar_operacao(operacao, op1, op2, variaveis):
     raise ValueError(f"Operação inválida: {operacao}")
 
 def resolver_operando(operando, variaveis):
-    """Resolve um operando, que pode ser uma variável ou um valor numérico."""
 
     if isinstance(operando, str):  # Verifica se o operando é uma string
         if operando in variaveis:
@@ -53,7 +51,6 @@ def resolver_operando(operando, variaveis):
         return float(operando)  # Tenta converter para float
 
 def encontrar_label(label, labels):
-  """Encontra o índice de um label na lista de labels."""
 
   for i, tupla in enumerate(labels):
     if tupla[1] == label:
@@ -61,7 +58,6 @@ def encontrar_label(label, labels):
   raise ValueError(f"Label não encontrado: {label}")
 
 def interpretar_codigo(codigo, variaveis, labels):
-  """Interpreta o código intermediário."""
 
   pc = 0
   while pc < len(codigo):
@@ -105,10 +101,7 @@ def interpretar_codigo(codigo, variaveis, labels):
     pc += 1  # Incrementa o pc para a próxima instrução
 
 def main():
-    """Função principal do interpretador."""
-
-    # nome_arquivo = input("Digite o nome do arquivo .py: ")
-    nome_arquivo = "cod_Victor_Gabriel.py"
+    nome_arquivo = input("Digite o nome do arquivo .py:")
 
     try:
         spec = importlib.util.spec_from_file_location("modulo_personalizado", nome_arquivo)
