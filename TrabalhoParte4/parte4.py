@@ -101,8 +101,8 @@ def interpretar_codigo(codigo, variaveis, labels):
     pc += 1  # Incrementa o pc para a próxima instrução
 
 def main():
-    nome_arquivo = input("Digite o nome do arquivo .py:")
-
+    # nome_arquivo = input("Digite o nome do arquivo .py:")
+    nome_arquivo = "cod_1.py"
     try:
         spec = importlib.util.spec_from_file_location("modulo_personalizado", nome_arquivo)
         modulo = importlib.util.module_from_spec(spec)
