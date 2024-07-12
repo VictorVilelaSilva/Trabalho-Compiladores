@@ -102,7 +102,7 @@ def interpretar_codigo(codigo, variaveis, labels):
 
 def main():
     # nome_arquivo = input("Digite o nome do arquivo .py:")
-    nome_arquivo = "cod_1.py"
+    nome_arquivo = "cod_2.py"
     try:
         spec = importlib.util.spec_from_file_location("modulo_personalizado", nome_arquivo)
         modulo = importlib.util.module_from_spec(spec)
