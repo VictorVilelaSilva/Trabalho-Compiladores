@@ -6,13 +6,14 @@ diretorio = 'listas/lista1/EXS1.pas'
 lista = analisadorLexico(diretorio)
 
 def main():
+    l=[]
     print(lista)
     consome(Tokens.PROGRAM.value)
     consome(Tokens.TKN_VARIAVEIS.value)
     consome(Tokens.TKN_PONTOEVIRGULA.value)
-    declarations()
+    l.extend(declarations())
     consome(Tokens.BEGIN.value)
-    stmtList()
+    l.extend(stmtList())
     consome(Tokens.END.value)
     consome(Tokens.TKN_PONTO.value)
     print('CÓDIGO COMPILADO COM SUCESSO')
@@ -21,17 +22,23 @@ def main():
 def declarations():
     l = []
     consome(Tokens.VAR.value)
-    
-    declaration()
+    l.extend(declaration())
     restoDeclaration()
+    return l
     
 
 def declaration():
-    
-    listaIdent()
+    l=[]
+    l.extend(listaIdent())
     consome(Tokens.TKN_DOISPONTOS.value)
-    typeFuncao()
+    tipo = typeFuncao()
+    
+    for i in range(len(l)):
+        a1 = l[i][0]
+        a2 = l[i][1]
+        l[i] = (a1, a2, tipo, None)
     consome(Tokens.TKN_PONTOEVIRGULA.value)
+    return l
     
 
 def listaIdent():
@@ -39,6 +46,7 @@ def listaIdent():
     l.append(("=", lista[0][1],None,None))
     consome(Tokens.TKN_VARIAVEIS.value)
     l.extend(restoIdentList())
+    return l
     
 
 def restoIdentList():
@@ -48,11 +56,10 @@ def restoIdentList():
         l.append(("=", lista[0][1],None,None))
         consome(Tokens.TKN_VARIAVEIS.value)
         l.extend(restoIdentList())
-        a = 32
         return l
     # OU VAZIO
     else:
-        return
+        return l
     
 
 def restoDeclaration():
@@ -65,13 +72,19 @@ def restoDeclaration():
 
 def typeFuncao():
     if Tokens.INTEGER.value == lista[0][0]:
+        a = 0
         (consome(Tokens.INTEGER.value))
+        return a
     # OU
     elif Tokens.REAL.value == lista[0][0]:
+        a = 0.0
         (consome(Tokens.REAL.value))
+        return a
     # OU
     elif Tokens.STRING.value == lista[0][0]:
+        a = ''
         (consome(Tokens.STRING.value))
+        return a
     else:      
         print('ERRO, ESPERAVA TOKEN ' + str(encontrar_nome_por_valor(Tokens.INTEGER.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.REAL.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.STRING.value)) + ' TEMOS TOKEN ' + str(encontrar_nome_por_valor(lista[0][0])))
         print('Linha ' + str(lista[0][2]) + ' Coluna ' + str(lista[0][3]))
@@ -95,8 +108,9 @@ def stmtList():
         return
 
 def stmt():
+    l=[]
     if Tokens.FOR.value == lista[0][0]:
-        forStmt()
+        l.extend(forStmt())
     # OU
     elif Tokens.READ.value == lista[0][0] or Tokens.WRITE.value == lista[0][0]:
         ioStmt()
@@ -142,8 +156,10 @@ def stmt():
 # DESCRIÇÃO AS INSTRUCOES
 
 def forStmt():
+    l=[]
     consome(Tokens.FOR.value)
-    atrib()
+    a2 = lista[0][1]
+    l.extend(atrib())
     consome(Tokens.TO.value)
     endFor()
     consome(Tokens.DO.value)
@@ -241,14 +257,19 @@ def elsePart():
 # expressoes
 
 def atrib():
+    l=[]
     consome(Tokens.TKN_VARIAVEIS.value)
+    a1 = lista[0][1]
     consome(Tokens.TKN_ATRIBUICAO.value)
-    expr()
+
+    l.extend(expr())
 
 def expr():
-    orFuncao()
+
+    return orFuncao()
 
 def orFuncao():
+    
     andFuncao()
     restoOr()
 
