@@ -158,20 +158,36 @@ def stmt():
 def forStmt():
     l=[]
     consome(Tokens.FOR.value)
-    a2 = lista[0][1]
-    l.extend(atrib())
+    b = atrib()
+    l.extend(b)
     consome(Tokens.TO.value)
-    endFor()
+    
+    a = endFor()
+    l.append(("label","inicioif", None, None))
+    ##CRIAR O GERADOR DE LABEL E TEMPS
+    l.append(("<>", temp , b[0][1], a))
+    l.append(("if", temp, "verdade", "falsidade"))
     consome(Tokens.DO.value)
-    stmt() 
+    l.append(("label", "verdade", None, None))
+    l.extend(stmt())
+    l.append(("+", b[0][1], b[0][1], 1))
+    l.append(("jump", "inicioif", None, None))
+    l.append(("label", "falsidade",None,None))
+    
+    return l
+    
 
 def endFor():
     if Tokens.TKN_VARIAVEIS.value == lista[0][0]:
+        a = lista[0][1]
         consome(Tokens.TKN_VARIAVEIS.value)
+        return a
 
     # OU
     elif Tokens.TKN_INT.value == lista[0][0]:
+        a = lista[0][1]
         consome(Tokens.TKN_INT.value)
+        return a
     else:      
         print('ERRO, ESPERAVA TOKEN ' + str(encontrar_nome_por_valor(Tokens.TKN_VARIAVEIS.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.TKN_INT.value)) + ' TEMOS TOKEN ' + str(encontrar_nome_por_valor(lista[0][0])))
         print('Linha ' + str(lista[0][2]) + ' Coluna ' + str(lista[0][3]))
@@ -259,14 +275,15 @@ def elsePart():
 def atrib():
     l=[]
     consome(Tokens.TKN_VARIAVEIS.value)
-    a1 = lista[0][1]
     consome(Tokens.TKN_ATRIBUICAO.value)
-
     l.extend(expr())
+    return l
 
 def expr():
-
-    return orFuncao()
+    l=[]
+    l.append(("1=1", "1=1", 1, None))
+    orFuncao()
+    return l
 
 def orFuncao():
     
