@@ -100,12 +100,14 @@ def bloco():
     consome(Tokens.TKN_PONTOEVIRGULA.value)
     
 def stmtList():
+    l=[]
     if Tokens.FOR.value == lista[0][0] or Tokens.READ.value == lista[0][0] or Tokens.WRITE.value == lista[0][0] or Tokens.WHILE.value == lista[0][0] or Tokens.TKN_VARIAVEIS.value == lista[0][0] or Tokens.IF.value == lista[0][0] or Tokens.BEGIN.value == lista[0][0] or Tokens.BREAK.value == lista[0][0] or Tokens.CONTINUE.value == lista[0][0] or Tokens.TKN_PONTOEVIRGULA.value == lista[0][0]:
-        stmt()
-        stmtList()
+        l.extend(stmt())
+        l.extend(stmtList())
+        return l
     # OU VAZIO
     else:
-        return
+        return l
 
 def stmt():
     l=[]
@@ -113,7 +115,7 @@ def stmt():
         l.extend(forStmt())
     # OU
     elif Tokens.READ.value == lista[0][0] or Tokens.WRITE.value == lista[0][0]:
-        ioStmt()
+        l.extend(ioStmt())
 
     # OU
     elif Tokens.WHILE.value == lista[0][0]:
@@ -126,7 +128,7 @@ def stmt():
 
     # OU
     elif Tokens.IF.value == lista[0][0]:
-        ifStmt()
+        l.extend(ifStmt())
 
     # OU
     elif Tokens.BEGIN.value == lista[0][0]:
@@ -169,7 +171,7 @@ def forStmt():
     l.append(("if", temp, "verdade", "falsidade"))
     consome(Tokens.DO.value)
     l.append(("label", "verdade", None, None))
-    l.extend(stmt())
+    l.extend(stmt())    #meio do for
     l.append(("+", b[0][1], b[0][1], 1))
     l.append(("jump", "inicioif", None, None))
     l.append(("label", "falsidade",None,None))
@@ -202,15 +204,16 @@ def ioStmt():
         consome(Tokens.TKN_VARIAVEIS.value)
         consome(Tokens.TKN_FECHAPARENTESE.value)
         consome(Tokens.TKN_PONTOEVIRGULA.value)
+        return l
     # OU
     elif Tokens.WRITE.value == lista[0][0]:
         consome(Tokens.WRITE.value)
         consome(Tokens.TKN_ABREPARENTESE.value)
         l.append(("call", "print", lista[0][1], None))
-        outList()
+        l.extend(outList())
         consome(Tokens.TKN_FECHAPARENTESE.value)
         consome(Tokens.TKN_PONTOEVIRGULA.value)
-        
+        return l
     else:      
         print('ERRO, ESPERAVA TOKEN ' + str(encontrar_nome_por_valor(Tokens.READ.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.WRITE.value)) + ' TEMOS TOKEN ' + str(encontrar_nome_por_valor(lista[0][0])))
         print('Linha ' + str(lista[0][2]) + ' Coluna ' + str(lista[0][3]))
@@ -218,16 +221,18 @@ def ioStmt():
     return l
 
 def outList():
+    l=[]
     out()
-    restoOutList()
+    l.extend(restoOutList())
+    return l
     
 def restoOutList():
+    l=[]
     if Tokens.TKN_VIRGULA.value == lista[0][0]:
         consome(Tokens.TKN_VIRGULA.value)
-        outList()
+        l.extend(outList())
     #OU VAZIO
-    else:
-        return
+    return l
     
 def out():
     if Tokens.TKN_STRING.value == lista[0][0]:
@@ -254,21 +259,28 @@ def whileStmt():
     stmt()
 
 def ifStmt():
+    l=[]
     consome(Tokens.IF.value)
-    expr()
+    tuplas, temp = expr()
+    l.extend("if", temp, "verdade", "falsidade")
+    l.append(("label","verdade", None, None))
     consome(Tokens.THEN.value)
-    stmt()
-    elsePart()
+    l.extend(stmt()) #meio do if
+    l.append(("label","falsidade", None, None))
+    l.extend(elsePart())
+    return l
     
 
 def elsePart():
+    l=[]
     if Tokens.ELSE.value == lista[0][0]:
         consome(Tokens.ELSE.value)
-        stmt()
+        l.extend(stmt())
+        return l
     # OU
     # VAZIO
     else:
-        return
+        return l
 # ------------------------------------------------------------------------
 # expressoes
 
@@ -283,7 +295,7 @@ def expr():
     l=[]
     l.append(("1=1", "1=1", 1, None))
     orFuncao()
-    return l
+    return l , "temp1"
 
 def orFuncao():
     
