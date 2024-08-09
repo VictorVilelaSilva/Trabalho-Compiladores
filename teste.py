@@ -1,6 +1,7 @@
 import sys
 from parte1 import *
 from classTokens import *
+from functions import *
 
 diretorio = 'listas/lista1/EXS1.pas'
 lista = analisadorLexico(diretorio)
@@ -94,10 +95,12 @@ def typeFuncao():
 # INSTRUÇÕES DOS PROGRAMAS
 
 def bloco():
+    l=[]
     consome(Tokens.BEGIN.value)
-    stmtList()
+    l.extend(stmtList())
     consome(Tokens.END.value)
     consome(Tokens.TKN_PONTOEVIRGULA.value)
+    return l
     
 def stmtList():
     l=[]
@@ -113,40 +116,48 @@ def stmt():
     l=[]
     if Tokens.FOR.value == lista[0][0]:
         l.extend(forStmt())
+        return l
     # OU
     elif Tokens.READ.value == lista[0][0] or Tokens.WRITE.value == lista[0][0]:
         l.extend(ioStmt())
-
+        return l
     # OU
     elif Tokens.WHILE.value == lista[0][0]:
-        whileStmt()
+        l.extend(whileStmt())
+        return l
 
     # OU
     elif Tokens.TKN_VARIAVEIS.value == lista[0][0]:
-        atrib()
+        l.extend(atrib())
         consome(Tokens.TKN_PONTOEVIRGULA.value)
+        return l
 
     # OU
     elif Tokens.IF.value == lista[0][0]:
         l.extend(ifStmt())
+        return l
 
     # OU
     elif Tokens.BEGIN.value == lista[0][0]:
-        bloco()
+        l.extend(bloco())
+        return l
 
     # OU
     elif Tokens.BREAK.value == lista[0][0]:
         consome(Tokens.BREAK.value)
         consome(Tokens.TKN_PONTOEVIRGULA.value)
+        return l
 
     # OU
     elif Tokens.CONTINUE.value == lista[0][0]:
         consome(Tokens.CONTINUE.value)
         consome(Tokens.TKN_PONTOEVIRGULA.value)
+        return l
 
     # OU
     elif Tokens.TKN_PONTOEVIRGULA.value == lista[0][0]:
         consome(Tokens.TKN_PONTOEVIRGULA.value)
+        return l
         
     else:      
         print('ERRO, ESPERAVA TOKEN ' + str(encontrar_nome_por_valor(Tokens.FOR.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.READ.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.WRITE.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.WHILE.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.TKN_VARIAVEIS.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.IF.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.BEGIN.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.BREAK.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.CONTINUE.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.TKN_PONTOEVIRGULA.value)) + ' TEMOS TOKEN ' + str(encontrar_nome_por_valor(lista[0][0])))
@@ -163,18 +174,21 @@ def forStmt():
     b = atrib()
     l.extend(b)
     consome(Tokens.TO.value)
-    
     a = endFor()
-    l.append(("label","inicioif", None, None))
+    inicioif = gera_label()
+    verdade = gera_label()
+    falsidade = gera_label()
+    temp = gera_temp()
+    l.append(("label",inicioif, None, None))
     ##CRIAR O GERADOR DE LABEL E TEMPS
     l.append(("<>", temp , b[0][1], a))
-    l.append(("if", temp, "verdade", "falsidade"))
+    l.append(("if", temp, verdade, falsidade))
     consome(Tokens.DO.value)
-    l.append(("label", "verdade", None, None))
+    l.append(("label", verdade, None, None))
     l.extend(stmt())    #meio do for
     l.append(("+", b[0][1], b[0][1], 1))
-    l.append(("jump", "inicioif", None, None))
-    l.append(("label", "falsidade",None,None))
+    l.append(("jump", inicioif, None, None))
+    l.append(("label", falsidade,None,None))
     
     return l
     
@@ -251,23 +265,38 @@ def out():
         print('ERRO, ESPERAVA TOKEN ' + str(encontrar_nome_por_valor(Tokens.TKN_STRING.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.TKN_VARIAVEIS.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.TKN_INT.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.TKN_FLOAT.value)) +' TEMOS TOKEN ' + str(encontrar_nome_por_valor(lista[0][0])))
         print('Linha ' + str(lista[0][2]) + ' Coluna ' + str(lista[0][3]))
         exit()
-
+#-------------------------------EM ABERTO------------------------
 def whileStmt():
+    l=[]
     consome(Tokens.WHILE.value)
-    expr()
+    tuplas, temp = expr()
+    verdade = gera_label()
+    falsidade = gera_label()
+    inicio_while = gera_label()
+    l.extend("label", inicio_while,None,None)
+    l.extend("if", temp, verdade, falsidade)
+    l.append(("label",verdade, None, None))
     consome(Tokens.DO.value)
-    stmt()
-
+    #MEIO DO WHILE
+    l.extend(stmt())
+    l.append(("jump", inicio_while,None,None))
+    l.append(("label",falsidade, None, None))
+    
+    return l
+#-------------------------------EM ABERTO------------------------
 def ifStmt():
     l=[]
     consome(Tokens.IF.value)
     tuplas, temp = expr()
-    l.extend("if", temp, "verdade", "falsidade")
-    l.append(("label","verdade", None, None))
+    verdade = gera_label()
+    falsidade = gera_label()
+    l.extend(("if", temp, verdade, falsidade))
+    l.append(("label",verdade, None, None))
     consome(Tokens.THEN.value)
     l.extend(stmt()) #meio do if
-    l.append(("label","falsidade", None, None))
+    l.append(("label",falsidade, None, None))
     l.extend(elsePart())
+    
     return l
     
 

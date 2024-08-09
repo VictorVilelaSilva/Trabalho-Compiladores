@@ -2,6 +2,9 @@ from classTokens import Tokens
 import re
 from typing import List
 
+numLabel = 0
+numTemp = 0
+
 def is_integer(s):
     return s.isdigit()
 
@@ -102,3 +105,15 @@ def obter_valor_simbolo(simbolo:any):
         return enum_simbolo.value
     except KeyError:
         return None
+
+def gera_label():
+    global numLabel
+    label = "label" + str(numLabel)
+    numLabel += 1
+    return label
+
+def gera_temp():
+    global numTemp
+    temp = "temp" + str(numTemp)
+    numTemp += 1
+    return temp
