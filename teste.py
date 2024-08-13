@@ -300,12 +300,14 @@ def ifStmt():
     l.extend(tuplas)
     verdade = gera_label()
     falsidade = gera_label()
+    fimif = gera_label()
     l.append(("if", temp, verdade, falsidade))
     l.append(("label",verdade, None, None))
     consome(Tokens.THEN.value)
     l.extend(stmt()) #meio do if
     l.append(("label",falsidade, None, None))
     l.extend(elsePart())
+    l.append(("label", fimif, None, None))
     
     return l
     
