@@ -3,7 +3,7 @@ from parte1 import *
 from classTokens import *
 from functions import *
 
-diretorio = 'listas/lista1/EXS1.pas'
+diretorio = 'listas/listaPT4/EXS1.pas'
 lista = analisadorLexico(diretorio)
 
 def main():
@@ -18,13 +18,14 @@ def main():
     consome(Tokens.END.value)
     consome(Tokens.TKN_PONTO.value)
     print('CÓDIGO COMPILADO COM SUCESSO')
-
+    print (l)
+    return l
 
 def declarations():
     l = []
     consome(Tokens.VAR.value)
     l.extend(declaration())
-    restoDeclaration()
+    l.extend(restoDeclaration())
     return l
     
 
@@ -64,12 +65,13 @@ def restoIdentList():
     
 
 def restoDeclaration():
+    l=[]
     if Tokens.TKN_VARIAVEIS.value == lista[0][0]:
-        declaration()
-        restoDeclaration()
+        l.extend(declaration())
+        l.extend(restoDeclaration())
     # OU VAZIO
     else:
-        return
+        return l
 
 def typeFuncao():
     if Tokens.INTEGER.value == lista[0][0]:
@@ -223,7 +225,6 @@ def ioStmt():
     elif Tokens.WRITE.value == lista[0][0]:
         consome(Tokens.WRITE.value)
         consome(Tokens.TKN_ABREPARENTESE.value)
-        l.append(("call", "print", lista[0][1], None))
         l.extend(outList())
         consome(Tokens.TKN_FECHAPARENTESE.value)
         consome(Tokens.TKN_PONTOEVIRGULA.value)
@@ -236,7 +237,7 @@ def ioStmt():
 
 def outList():
     l=[]
-    out()
+    l.extend(out())
     l.extend(restoOutList())
     return l
     
@@ -249,18 +250,26 @@ def restoOutList():
     return l
     
 def out():
+    l=[]
     if Tokens.TKN_STRING.value == lista[0][0]:
+        l.append(("call", "print", lista[0][1], None))
         consome(Tokens.TKN_STRING.value)
+        return l
     # OU
     elif Tokens.TKN_VARIAVEIS.value == lista[0][0]:
+        l.append(("call", "print", lista[0][1], None))
         consome(Tokens.TKN_VARIAVEIS.value)
+        return l
     # OU
     elif Tokens.TKN_INT.value == lista[0][0]:
+        l.append(("call", "print", lista[0][1], None))
         consome(Tokens.TKN_INT.value)
+        return l
     # OU
     elif Tokens.TKN_FLOAT.value == lista[0][0]:
+        l.append(("call", "print", lista[0][1], None))
         consome(Tokens.TKN_FLOAT.value)
-        
+        return l
     else:      
         print('ERRO, ESPERAVA TOKEN ' + str(encontrar_nome_por_valor(Tokens.TKN_STRING.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.TKN_VARIAVEIS.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.TKN_INT.value)) + ' ou ' + str(encontrar_nome_por_valor(Tokens.TKN_FLOAT.value)) +' TEMOS TOKEN ' + str(encontrar_nome_por_valor(lista[0][0])))
         print('Linha ' + str(lista[0][2]) + ' Coluna ' + str(lista[0][3]))
@@ -269,16 +278,16 @@ def out():
 def whileStmt():
     l=[]
     consome(Tokens.WHILE.value)
+    l.extend("label", inicio_while,None,None)
     tuplas, temp = expr()
     verdade = gera_label()
     falsidade = gera_label()
     inicio_while = gera_label()
-    l.extend("label", inicio_while,None,None)
     l.extend("if", temp, verdade, falsidade)
     l.append(("label",verdade, None, None))
     consome(Tokens.DO.value)
     #MEIO DO WHILE
-    l.extend(stmt())
+    tuplas2, temp2 = (stmt())
     l.append(("jump", inicio_while,None,None))
     l.append(("label",falsidade, None, None))
     
@@ -288,9 +297,10 @@ def ifStmt():
     l=[]
     consome(Tokens.IF.value)
     tuplas, temp = expr()
+    l.extend(tuplas)
     verdade = gera_label()
     falsidade = gera_label()
-    l.extend(("if", temp, verdade, falsidade))
+    l.append(("if", temp, verdade, falsidade))
     l.append(("label",verdade, None, None))
     consome(Tokens.THEN.value)
     l.extend(stmt()) #meio do if
