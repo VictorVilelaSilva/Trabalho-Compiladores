@@ -114,7 +114,7 @@ def stmtList():
     else:
         return l
 
-def stmt():
+def stmt(label):
     l=[]
     if Tokens.FOR.value == lista[0][0]:
         l.extend(forStmt())
@@ -136,7 +136,7 @@ def stmt():
 
     # OU
     elif Tokens.IF.value == lista[0][0]:
-        l.extend(ifStmt())
+        l.extend(ifStmt(label))
         return l
 
     # OU
@@ -146,6 +146,7 @@ def stmt():
 
     # OU
     elif Tokens.BREAK.value == lista[0][0]:
+        l.extend(("jump", "label", None, None))
         consome(Tokens.BREAK.value)
         consome(Tokens.TKN_PONTOEVIRGULA.value)
         return l
@@ -187,7 +188,7 @@ def forStmt():
     l.append(("if", temp, verdade, falsidade))
     consome(Tokens.DO.value)
     l.append(("label", verdade, None, None))
-    l.extend(stmt())    #meio do for
+    l.extend(stmt(falsidade))    #meio do for
     l.append(("+", b[0][1], b[0][1], 1))
     l.append(("jump", inicioif, None, None))
     l.append(("label", falsidade,None,None))
@@ -278,22 +279,23 @@ def out():
 def whileStmt():
     l=[]
     consome(Tokens.WHILE.value)
-    l.extend("label", inicio_while,None,None)
+    l.append(("label", inicio_while,None,None))
     tuplas, temp = expr()
+    l.extend(tuplas)
     verdade = gera_label()
     falsidade = gera_label()
     inicio_while = gera_label()
-    l.extend("if", temp, verdade, falsidade)
+    l.append(("if", temp, verdade, falsidade))
     l.append(("label",verdade, None, None))
     consome(Tokens.DO.value)
     #MEIO DO WHILE
-    tuplas2, temp2 = (stmt())
+    l.extend(stmt(falsidade))
     l.append(("jump", inicio_while,None,None))
     l.append(("label",falsidade, None, None))
     
     return l
 #-------------------------------EM ABERTO------------------------
-def ifStmt():
+def ifStmt(label):
     l=[]
     consome(Tokens.IF.value)
     tuplas, temp = expr()
@@ -304,19 +306,18 @@ def ifStmt():
     l.append(("if", temp, verdade, falsidade))
     l.append(("label",verdade, None, None))
     consome(Tokens.THEN.value)
-    l.extend(stmt()) #meio do if
+    l.extend(stmt(label)) #meio do if
     l.append(("label",falsidade, None, None))
-    l.extend(elsePart())
+    l.extend(elsePart(label))
     l.append(("label", fimif, None, None))
-    
     return l
     
 
-def elsePart():
+def elsePart(label):
     l=[]
     if Tokens.ELSE.value == lista[0][0]:
         consome(Tokens.ELSE.value)
-        l.extend(stmt())
+        l.extend(stmt(label))
         return l
     # OU
     # VAZIO
