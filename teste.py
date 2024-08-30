@@ -154,6 +154,7 @@ def stmt(label):
 
     # OU
     elif Tokens.CONTINUE.value == lista[0][0]:
+        l.extend(("jump", "label", None, None))
         consome(Tokens.CONTINUE.value)
         consome(Tokens.TKN_PONTOEVIRGULA.value)
         return l
