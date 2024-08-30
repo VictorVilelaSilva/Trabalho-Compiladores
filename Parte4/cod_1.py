@@ -27,8 +27,5 @@ def programa():
         ("label","falsidade",None,None),
         ("call","print","Triangulo nao pode ser formado",None),
         ("label","fimif",None,None)
-
-
-        
     ]
     return l
