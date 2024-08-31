@@ -14,7 +14,8 @@ def main():
     consome(Tokens.TKN_PONTOEVIRGULA.value)
     l.extend(declarations())
     consome(Tokens.BEGIN.value)
-    l.extend(stmtList())
+    label = helper.gera_label()
+    l.extend(stmtList(label))
     consome(Tokens.END.value)
     consome(Tokens.TKN_PONTO.value)
     print('CÓDIGO COMPILADO COM SUCESSO')
@@ -96,19 +97,19 @@ def typeFuncao():
 # ------------------------------------------------
 # INSTRUÇÕES DOS PROGRAMAS
 
-def bloco():
+def bloco(label):
     l=[]
     consome(Tokens.BEGIN.value)
-    l.extend(stmtList())
+    l.extend(stmtList(label))
     consome(Tokens.END.value)
     consome(Tokens.TKN_PONTOEVIRGULA.value)
     return l
     
-def stmtList():
+def stmtList(label):
     l=[]
     if Tokens.FOR.value == lista[0][0] or Tokens.READ.value == lista[0][0] or Tokens.WRITE.value == lista[0][0] or Tokens.WHILE.value == lista[0][0] or Tokens.TKN_VARIAVEIS.value == lista[0][0] or Tokens.IF.value == lista[0][0] or Tokens.BEGIN.value == lista[0][0] or Tokens.BREAK.value == lista[0][0] or Tokens.CONTINUE.value == lista[0][0] or Tokens.TKN_PONTOEVIRGULA.value == lista[0][0]:
-        l.extend(stmt())
-        l.extend(stmtList())
+        l.extend(stmt(label))
+        l.extend(stmtList(label))
         return l
     # OU VAZIO
     else:
@@ -141,7 +142,7 @@ def stmt(label):
 
     # OU
     elif Tokens.BEGIN.value == lista[0][0]:
-        l.extend(bloco())
+        l.extend(bloco(label))
         return l
 
     # OU
@@ -153,6 +154,7 @@ def stmt(label):
 
     # OU
     elif Tokens.CONTINUE.value == lista[0][0]:
+        l.extend(("jump", "label", None, None))
         consome(Tokens.CONTINUE.value)
         consome(Tokens.TKN_PONTOEVIRGULA.value)
         return l
