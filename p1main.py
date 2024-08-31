@@ -1,18 +1,18 @@
+import sys
+sys.path.append('..')
+from Helpers.mainHelper import FunctionsClass
 import json
 import re
 from typing import List
-from functions import *
-from enum import Enum
+
 
 #####################################Analisador Léxico (Pascal)################################
 # percorre o arquivo e retorna os tokens
-
+helper = FunctionsClass()
 padrao = r"(\d+[a-zA-Z_][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_]*|<>|=|:=|>=|<=|<|>|:|[\d.]+|'[^']*'| |\S)"
 
 def getTokens(pascalExerciseContent: str) -> List[dict]:
 
-    intRegex = r'^[0-9]+$'
-    floatRegex = r'[0-9]+\.[0-9]+'
     variableRegex = r'[a-zA-Z][a-zA-Z0-9_]*'
     TokensAritimeticos = {
         "+": "tkn_adicao",
@@ -72,7 +72,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
         tempLine = line.lstrip()
 
         if (modoString):
-            errorCatchString(linhaString, stringStart, actualLine)
+            helper.errorCatchString(linhaString, stringStart, actualLine)
 
         if(tempLine.startswith('//')):
             coluna = coluna+2
@@ -114,7 +114,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
             if(word.startswith("'")):
                 if(word.endswith("'")):
                     stringsArray.append(['tkn_string',word,linha,coluna])
-                    lista.append([obter_valor_simbolo('tkn_string'),word,linha,coluna])
+                    lista.append([helper.obter_valor_simbolo('tkn_string'),word,linha,coluna])
                     coluna += (len(word))
                     continue
                 else:
@@ -130,7 +130,7 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 string += " " + word
                 if(word.endswith("'")):
                     stringsArray.append(['tkn_string',string,linhaString,stringStart])
-                    lista.append([obter_valor_simbolo('tkn_string'),string,linhaString,stringStart])
+                    lista.append([helper.obter_valor_simbolo('tkn_string'),string,linhaString,stringStart])
                     coluna += (len(word))
                     string = ""
                     modoString = False
@@ -138,20 +138,20 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                 
             # verifica se a palavra é uma palavra reservada
             if (word in palavrasReservadasRegras) and not dentroComentario:
-                lista.append([obter_valor_simbolo(word),word,linha,coluna])
+                lista.append([helper.obter_valor_simbolo(word),word,linha,coluna])
                 coluna += (len(word))
                 continue
 
-            elif (is_float(word)):
+            elif (helper.is_float(word)):
                 simbolo = 'tkn_float'
                 word += '0'  # adicionar float
-                lista.append([obter_valor_simbolo(simbolo), word,linha,coluna])
+                lista.append([helper.obter_valor_simbolo(simbolo), word,linha,coluna])
                 coluna += (len(word))
                 continue
             
-            elif (is_integer(word)):
+            elif (helper.is_integer(word)):
                 simbolo = 'tkn_int'
-                lista.append([obter_valor_simbolo(simbolo), word,linha,coluna])
+                lista.append([helper.obter_valor_simbolo(simbolo), word,linha,coluna])
                 coluna += (len(word))
                 continue
             
@@ -160,27 +160,27 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
             elif (word not in palavrasReservadasRegras) and (word not in tokensLogicosRelacionaisAtriRegras)and (re.fullmatch(variableRegex, word) and not dentroComentario):
 
                 simbolo = 'tkn_variaveis'
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                lista.append([helper.obter_valor_simbolo(simbolo),word,linha,coluna])
                 coluna += (len(word))
                 continue
 
             # verifica se a palavra é um tokensLogicosRelacionaisAtri
             elif (word in tokensLogicosRelacionaisAtriRegras) and not dentroComentario:
                 simbolo = TokensLogicos[word]
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                lista.append([helper.obter_valor_simbolo(simbolo),word,linha,coluna])
                 coluna += (len(word))
                 continue
             
             # verifica se o caractere é um tokensAritimeticos
             elif (word in tokensAritimeticosRegras) and not dentroComentario:
                 simbolo = TokensAritimeticos[word]
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                lista.append([helper.obter_valor_simbolo(simbolo),word,linha,coluna])
                 coluna += (len(word))
                 continue
             # verifica se o caractere é um tokenSimbolo
             elif(word in tokensSimbolosRegras) and not dentroComentario:
                 simbolo = TokensSimbolos[word]
-                lista.append([obter_valor_simbolo(simbolo),word,linha,coluna])
+                lista.append([helper.obter_valor_simbolo(simbolo),word,linha,coluna])
                 coluna += (len(word))
                 continue
             
@@ -213,9 +213,9 @@ def getTokens(pascalExerciseContent: str) -> List[dict]:
                     continue
 
                 else:
-                    errorCatch(linha, line, word) 
+                    helper.errorCatch(linha, line, word) 
     if(dentroComentario):
-        errorCatchComentario(linhaComentario, colunaComentario, lineComentario)        
+        helper.errorCatchComentario(linhaComentario, colunaComentario, lineComentario)        
             
 
     tokensDict = {
@@ -286,7 +286,6 @@ tokensSimbolosRegras: List[str] = [
     ')',
 ]
 
-  
 def analisadorLexico(arquivo):
     # Abre o arquivo informado como argumento
     try:
@@ -306,3 +305,11 @@ def analisadorLexico(arquivo):
     except FileNotFoundError:
         print(f"Erro: O arquivo '{arquivo}' não foi encontrado.")
 
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        analisadorLexico(sys.argv[1])
+    else:
+        print("Erro: Informe o arquivo a ser analisado.")
+        print("Exemplo: python3 p1main.py arquivo.pas")
+        exit()

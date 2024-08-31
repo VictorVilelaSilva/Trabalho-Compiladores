@@ -1,10 +1,10 @@
 import sys
-from parte1 import *
-from classTokens import *
-from functions import *
+sys.path.append('..')
+from p1main import analisadorLexico
+from Helpers.mainToken import Tokens
+from Helpers.mainHelper import FunctionsClass
 
-diretorio = 'listas/lista1/EXS1.pas'
-lista = analisadorLexico(diretorio)
+helper = FunctionsClass()
 
 def main():
     l=[]
@@ -14,7 +14,7 @@ def main():
     consome(Tokens.TKN_PONTOEVIRGULA.value)
     l.extend(declarations())
     consome(Tokens.BEGIN.value)
-    label = gera_label()
+    label = helper.gera_label()
     l.extend(stmtList(label))
     consome(Tokens.END.value)
     consome(Tokens.TKN_PONTO.value)
@@ -180,10 +180,10 @@ def forStmt():
     l.extend(b)
     consome(Tokens.TO.value)
     a = endFor()
-    inicioif = gera_label()
-    verdade = gera_label()
-    falsidade = gera_label()
-    temp = gera_temp()
+    inicioif = helper.gera_label()
+    verdade = helper.gera_label()
+    falsidade = helper.gera_label()
+    temp = helper.gera_temp()
     l.append(("label",inicioif, None, None))
     ##CRIAR O GERADOR DE LABEL E TEMPS
     l.append(("<>", temp , b[0][1], a))
@@ -284,9 +284,9 @@ def whileStmt():
     l.append(("label", inicio_while,None,None))
     tuplas, temp = expr()
     l.extend(tuplas)
-    verdade = gera_label()
-    falsidade = gera_label()
-    inicio_while = gera_label()
+    verdade = helper.gera_label()
+    falsidade = helper.gera_label()
+    inicio_while = helper.gera_label()
     l.append(("if", temp, verdade, falsidade))
     l.append(("label",verdade, None, None))
     consome(Tokens.DO.value)
@@ -302,9 +302,9 @@ def ifStmt(label):
     consome(Tokens.IF.value)
     tuplas, temp = expr()
     l.extend(tuplas)
-    verdade = gera_label()
-    falsidade = gera_label()
-    fimif = gera_label()
+    verdade = helper.gera_label()
+    falsidade = helper.gera_label()
+    fimif = helper.gera_label()
     l.append(("if", temp, verdade, falsidade))
     l.append(("label",verdade, None, None))
     consome(Tokens.THEN.value)
@@ -515,4 +515,8 @@ def encontrar_nome_por_valor(valor):
     for token in Tokens:
         if token.value == valor:
             return token.name
-main()
+        
+if __name__ == '__main__':
+    diretorio = sys.argv[1]
+    lista = analisadorLexico(diretorio)
+    main()

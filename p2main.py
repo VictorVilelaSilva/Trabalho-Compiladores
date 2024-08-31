@@ -1,9 +1,7 @@
 import sys
-from parte1 import *
-from classTokens import *
-
-diretorio = r'listas\lista1\EXS1.pas'
-lista = analisadorLexico(diretorio)
+sys.path.append('..')
+from p1main import analisadorLexico
+from Helpers.mainToken import Tokens
 
 def main():
     print(lista)
@@ -215,7 +213,6 @@ def ifStmt():
     stmt()
     elsePart()
     
-
 def elsePart():
     if Tokens.ELSE.value == lista[0][0]:
         consome(Tokens.ELSE.value)
@@ -263,7 +260,6 @@ def restoAnd():
     else:
         return
 
-
 def notFuncao():
     if Tokens.NOT.value == lista[0][0]:
         consome(Tokens.NOT.value)
@@ -272,8 +268,6 @@ def notFuncao():
     else:
         rel()
         
-        
-
 def rel():
     addFuncao()
     restoRel()
@@ -308,7 +302,6 @@ def restoRel():
     else:
         return
 
-
 def addFuncao():
     mult()
     restoAdd()
@@ -328,7 +321,6 @@ def restoAdd():
     # VAZIO
     else:
         return
-
 
 def mult():
     uno()
@@ -359,7 +351,6 @@ def restoMult():
     else:
         return
 
-
 def uno():
     if Tokens.TKN_ADICAO.value == lista[0][0]:
         consome(Tokens.TKN_ADICAO.value)
@@ -371,7 +362,6 @@ def uno():
     # OU
     else:
         fator()
-
 
 def fator():
     if Tokens.TKN_INT.value == lista[0][0]:
@@ -390,10 +380,7 @@ def fator():
             
     elif Tokens.TKN_STRING.value == lista[0][0]:
         consome(Tokens.TKN_STRING.value)
-        
-
-
-
+    
 # CADA CONSOME DA UM POP NA LISTA
 def consome(token_consumido):
     if lista[0][0] == token_consumido:
@@ -408,4 +395,8 @@ def encontrar_nome_por_valor(valor):
     for token in Tokens:
         if token.value == valor:
             return token.name
-main()
+
+if __name__ == '__main__':
+    diretorio = sys.argv[1]
+    lista = analisadorLexico(diretorio)
+    main()
