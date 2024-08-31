@@ -100,18 +100,19 @@ def interpretar_codigo(codigo, variaveis, labels):
 
     pc += 1  # Incrementa o pc para a próxima instrução
 
-def main():
+def mainP4(codigo):
+    # -----------------DESCOMENTAR CASO QUEIRA TESTAR PELOS ARQUIVOS COD_1.PY...-----------------
     # nome_arquivo = input("Digite o nome do arquivo .py:")
-    nome_arquivo = "cod_2.py"
-    try:
-        spec = importlib.util.spec_from_file_location("modulo_personalizado", nome_arquivo)
-        modulo = importlib.util.module_from_spec(spec)
-        sys.modules["modulo_personalizado"] = modulo
-        spec.loader.exec_module(modulo)
-        codigo = modulo.programa()  # Obtém a lista de tuplas da função programa
-    except FileNotFoundError:
-        print(f"Erro: Arquivo '{nome_arquivo}' não encontrado.")
-        return
+    # nome_arquivo = "cod_2.py"
+    # try:
+    #     spec = importlib.util.spec_from_file_location("modulo_personalizado", nome_arquivo)
+    #     modulo = importlib.util.module_from_spec(spec)
+    #     sys.modules["modulo_personalizado"] = modulo
+    #     spec.loader.exec_module(modulo)
+    #     codigo = modulo.programa()  # Obtém a lista de tuplas da função programa
+    # except FileNotFoundError:
+    #     print(f"Erro: Arquivo '{nome_arquivo}' não encontrado.")
+    #     return
 
     variaveis = {}
     labels = [(i, tupla[1]) for i, tupla in enumerate(codigo) if tupla[0] == "label"]
@@ -122,4 +123,4 @@ def main():
       print(f"Erro durante a execução: {e}")
         
 if __name__ == "__main__":
-  main()
+  mainP4()
