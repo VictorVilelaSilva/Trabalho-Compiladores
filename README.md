@@ -1,30 +1,34 @@
-# Pascal Lexical Analyzer
+# Projeto Mini Pascal Compiler
 
-Este projeto é um analisador léxico para a linguagem de programação Pascal, implementado em Python. Ele analisa um arquivo Pascal `.pas` e extrai os tokens, seguindo as especificações da linguagem.
-
-## Pré-requisitos
-
-Antes de começar, certifique-se de ter o Python instalado em seu sistema. Este projeto foi testado com Python 3.8.
-
-## Uso
-
-Para usar o analisador léxico, execute o script `main.py` passando o caminho do arquivo Pascal como argumento:
-
-
-Exemplo:
-
-python main.py <\localAquivo>
-
-O script irá processar o arquivo e imprimir a lista de tokens no terminal. Um arquivo `resultado.json` também será gerado no diretório atual com os tokens analisados.
-
+Este projeto é um compilador para uma linguagem de programação similar ao Pascal, chamada Mini Pascal. O compilador é escrito em Python e é capaz de analisar, processar e compilar programas escritos em Mini Pascal.
 
 ## Estrutura do Projeto
 
-O projeto consiste em três arquivos principais:
+A estrutura do projeto é a seguinte:
 
-- `main.py`: Contém o ponto de entrada do script e a lógica para ler arquivos e chamar o analisador léxico.
-- `functions.py`: Fornece funções auxiliares para o processo de análise léxica, como a verificação de tipos de tokens e a manipulação de erros.
-- `classTokens.py`: Define uma enumeração `Tokens` que mapeia os tipos de tokens para valores numéricos.
+### Principais Arquivos e Diretórios
 
+- **main.py**: Arquivo principal que coordena o processo de compilação.
+- **p1main.py, p2main.py, p3main.py**: Módulos que implementam diferentes fases do compilador (análise léxica, sintática, etc.).
+- **Helpers/**: Diretório contendo funções e classes auxiliares.
+    - **mainHelper.py**: Define a classe `FunctionsClass` com funções auxiliares.
+    - **mainToken.py**: Contém a definição dos tokens utilizados pelo analisador léxico.
+- **Parte4/**: Diretório contendo implementação adicional do compilador.
+    - **parte4.py**: Módulo com funcionalidades avançadas ou específicas da quarta parte do projeto.
+- **listas/**: Contém exemplos de programas em Mini Pascal para teste.
+- **miniPascal.gmr**: Arquivo de gramática da linguagem Mini Pascal.
 
+## Funcionalidades
 
+- **Análise Léxica**: Identifica e classifica tokens no código fonte.
+- **Análise Sintática**: Verifica a estrutura do código de acordo com a gramática definida.
+- **Análise Semântica**: Realiza verificações semânticas, como declarações de variáveis e tipos.
+- **Geração de Código**: Gera código intermediário ou código objeto a partir da análise do código fonte.
+
+## Testes
+
+Dentro do diretório `listas`, você encontrará vários exemplos de programas em Mini Pascal que podem ser utilizados para testar o compilador. Para executar um desses programas:
+
+1. Abra o arquivo `main.py`.
+2. Modifique o trecho do código que lê o arquivo de entrada para apontar para o programa desejado.
+3. Execute o compilador conforme as instruções anteriores.
